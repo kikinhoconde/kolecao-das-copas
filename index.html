@@ -2,776 +2,699 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kolecao das Copas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOLEÇÃO — Ecossistema Katorze</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
-body{background:#f7f8fa;color:#1a1a2e;min-height:100vh;}
-input,select,textarea{width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;background:#fff;color:#111;outline:none;}
-textarea{resize:vertical;}
-.btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;}
-.btn-blue{background:#002868;color:#fff;}
-.btn-green{background:#006847;color:#fff;}
-.btn-out{background:#fff;border:1px solid #e5e7eb;color:#111;font-weight:400;}
-.btn-sm{padding:3px 8px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;cursor:pointer;font-size:11px;}
-header{background:linear-gradient(135deg,#002868,#B22234);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:0 2px 8px rgba(0,0,0,.18);}
-header .logo{display:flex;align-items:center;gap:10px;}
-header .logo h1{font-size:16px;color:#fff;font-weight:700;}
-header .logo small{font-size:10px;color:#C8A45A;letter-spacing:2px;display:block;}
-nav{background:#002868;display:flex;padding:0 20px;border-bottom:3px solid #C8A45A;}
-nav button{padding:11px 14px;border:none;background:none;cursor:pointer;font-size:13px;color:rgba(255,255,255,.7);border-bottom:3px solid transparent;margin-bottom:-3px;font-weight:400;}
-nav button.active{color:#C8A45A;border-bottom-color:#C8A45A;font-weight:700;}
-main{padding:18px 20px;max-width:1100px;margin:0 auto;}
-.card{background:#fff;border:0.5px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
-.grid-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
-.metric{border-radius:10px;padding:12px;border-left:4px solid;}
-.metric .ml{font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:3px;}
-.metric .mv{font-size:17px;font-weight:700;}
-table{width:100%;border-collapse:collapse;}
-th{text-align:left;padding:8px;border-bottom:2px solid #dbeafe;color:#002868;font-weight:700;font-size:11px;text-transform:uppercase;}
-td{padding:8px;border-bottom:0.5px solid #e5e7eb;vertical-align:middle;font-size:12px;}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;}
-.badge .dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
-.pill{display:inline-block;padding:1px 6px;border-radius:4px;background:#dbeafe;color:#002868;font-size:10px;font-weight:600;margin-right:2px;}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,20,60,.5);z-index:100;align-items:flex-start;justify-content:center;padding-top:20px;overflow-y:auto;}
-.overlay.show{display:flex;}
-.modal{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:520px;border:1px solid #e5e7eb;margin-bottom:40px;}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.fg{margin-bottom:12px;}
-.fg label{font-size:12px;color:#6b7280;font-weight:600;margin-bottom:4px;display:block;}
-.row-flex{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
-.obs-row td{background:#fef3c7;font-size:11px;color:#92400e;padding:6px 12px;}
-#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#002868 0%,#B22234 60%,#006847 100%);}
-#auth-box{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
-.tab-btns{display:flex;gap:8px;margin-bottom:16px;}
-.tab-btns button{flex:1;padding:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;}
-.err{color:#991b1b;font-size:12px;padding:8px;background:#fee2e2;border-radius:6px;margin-bottom:10px;}
-.grade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:4px;max-height:230px;overflow-y:auto;padding:4px;border:1px solid #e5e7eb;border-radius:8px;}
-.fig-cell{padding:5px;border-radius:5px;border:1.5px solid #e5e7eb;background:#fff;font-size:10px;cursor:pointer;}
-.fig-cell.sel{border-color:#002868;background:#dbeafe;}
-.fig-cell.tem{border-color:#166534;background:#dcfce7;}
-.fig-top{display:flex;justify-content:space-between;align-items:center;}
-.fn{font-weight:700;color:#6b7280;}
-.fig-cell.sel .fn{color:#002868;}
-.fd{color:#6b7280;font-size:9px;}
-.ctrls{display:flex;align-items:center;gap:2px;}
-.ctrls button{width:14px;height:14px;border-radius:3px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:9px;padding:0;line-height:1;}
-.ctrls .qn{font-weight:700;color:#002868;font-size:10px;min-width:10px;text-align:center;}
-.sug-box{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;z-index:20;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-.sug-item{padding:7px 12px;cursor:pointer;font-size:12px;border-bottom:0.5px solid #e5e7eb;}
-.sug-item:hover{background:#f3f4f6;}
-.val-mode{background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:12px;border:1px solid #e5e7eb;}
-.mode-btns{display:flex;gap:8px;margin-bottom:8px;}
-.lote-list{max-height:240px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;}
-.lote-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:0.5px solid #e5e7eb;font-size:12px;}
-.lote-row.lsel{background:#eff6ff;}
-.lote-row.lselg{background:#f0fdf4;}
-.lote-ind{width:80px;padding:3px 5px;font-size:11px;border:1px solid #e5e7eb;border-radius:6px;display:none;}
+:root{--navy:#161b2e;--gold:#c9a24a;--bordo:#6d1f2e;--bg:#f4f5f7;--line:#e2e4ea;--red:#c0392b;--green:#1e8449;--mut:#6b7280}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{background:var(--bg);color:#1f2333}
+button{cursor:pointer;font-size:14px}
+input,select{font-size:14px}
+.hide{display:none!important}
+
+/* ---- AUTH ---- */
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);width:100%;max-width:380px;padding:32px}
+.brand{text-align:center;margin-bottom:22px}
+.brand h1{color:var(--gold);font-size:26px;letter-spacing:1px}
+.brand small{color:var(--mut)}
+.card h2{font-size:17px;margin-bottom:14px;color:var(--navy)}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+.fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px}
+.btn{background:var(--navy);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:600}
+.btn:hover{opacity:.92}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn.red{background:var(--red)}
+.btn.green{background:var(--green)}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.link{background:none;border:none;color:var(--bordo);text-decoration:underline;font-size:13px}
+.msg{font-size:13px;padding:8px;border-radius:6px;margin-bottom:10px}
+.msg.err{background:#fdecea;color:var(--red)}
+.msg.ok{background:#eafaf1;color:var(--green)}
+
+/* ---- APP ---- */
+#topbar{background:var(--navy);color:#fff;display:flex;align-items:center;padding:0 16px;height:54px}
+#topbar .logo{color:var(--gold);font-weight:700;letter-spacing:1px;margin-right:18px}
+#topbar nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+#topbar nav button{background:none;border:none;color:#c7cad6;padding:8px 12px;border-radius:7px}
+#topbar nav button.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+#topbar .who{font-size:12px;color:#9aa0b4;margin-right:10px}
+#wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.page{display:none}
+.page.on{display:block}
+h2.pg{font-size:20px;color:var(--navy);margin-bottom:4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:16px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .v{font-size:22px;font-weight:700;color:var(--navy)}
+.kpi .l{font-size:12px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+tr:hover td{background:#fafbfc}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#eef0f4;color:#444}
+.tag.colecao{background:#e7f0fb;color:#1d5fab}
+.tag.vendido,.tag.vendida{background:#eafaf1;color:var(--green)}
+.tag.perdido,.tag.perdida{background:#fdecea;color:var(--red)}
+.tag.trocado,.tag.trocada{background:#fef5e7;color:#b9770e}
+.tag.repetida{background:#f3e8fd;color:#7d3cc9}
+.val.neg{color:var(--red);font-weight:600}
+.val.pos{color:var(--green);font-weight:600}
+.empty{color:var(--mut);font-size:13px;padding:18px;text-align:center}
+
+/* modal */
+#ov{position:fixed;inset:0;background:rgba(15,18,30,.55);display:flex;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:50}
+#ov .box{background:#fff;border-radius:14px;width:100%;max-width:560px;padding:22px}
+#ov h3{color:var(--navy);margin-bottom:14px;font-size:17px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grade{display:flex;flex-wrap:wrap;gap:6px;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 7px;font-size:12px;display:flex;align-items:center;gap:5px}
+.chip.sel{border-color:var(--gold);background:#fdf6e3}
+.chip b{font-size:12px}
+.chip .qt{background:var(--navy);color:#fff;border-radius:10px;padding:0 6px;font-size:11px}
+.chip button{border:none;background:#eef0f4;width:18px;height:18px;border-radius:5px;line-height:1}
+.note{font-size:12px;color:var(--mut);margin-top:4px}
+.catfig{display:flex;flex-wrap:wrap;gap:5px}
+.catfig span{border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:12px;background:#fff}
+@media(max-width:560px){.row2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<div id="auth-screen">
-  <div id="auth-box">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div style="font-size:32px;">&#9917;</div>
-      <h2 style="font-size:20px;font-weight:800;color:#002868;">Kolecao das Copas</h2>
-      <p style="font-size:11px;color:#6b7280;letter-spacing:2px;">COPA DO MUNDO 1970-2026</p>
-    </div>
-    <div class="tab-btns">
-      <button id="tab-login" onclick="showTab('login')" style="background:#dbeafe;color:#002868;font-weight:700;">Entrar</button>
-      <button id="tab-reg" onclick="showTab('reg')">Cadastrar</button>
-    </div>
-    <div id="form-login">
-      <div id="lerr" class="err" style="display:none;"></div>
-      <div class="fg"><label>E-mail</label><input id="le" placeholder="seu@email.com"/></div>
-      <div class="fg"><label>Senha</label><input id="ls" type="password" placeholder="..."/></div>
-      <button class="btn btn-blue" style="width:100%;padding:11px;" onclick="doLogin()">Entrar</button>
-      <p style="font-size:11px;color:#9ca3af;margin-top:10px;text-align:center;">Demo: demo@demo.com / 123456</p>
-    </div>
-    <div id="form-reg" style="display:none;">
-      <div id="rerr" class="err" style="display:none;"></div>
-      <div class="fg"><label>Nome</label><input id="rn"/></div>
-      <div class="fg"><label>E-mail</label><input id="re"/></div>
-      <div class="fg"><label>Senha</label><input id="rs" type="password"/></div>
-      <button class="btn btn-blue" style="width:100%;padding:11px;" onclick="doReg()">Criar conta</button>
-    </div>
+<!-- ================= TELA DE LOGIN ================= -->
+<div id="auth">
+  <div class="card">
+    <div class="brand"><h1>KOLEÇÃO</h1><small>Ecossistema Katorze</small></div>
+    <div id="cfgWarn" class="msg err hide">Configuração do Supabase pendente. Veja o guia de configuração.</div>
+    <h2 id="authTitle">Entrar</h2>
+    <div id="authMsg"></div>
+    <div class="fld"><label>E-mail</label><input id="aEmail" type="email" autocomplete="email"></div>
+    <div class="fld"><label>Senha</label><input id="aPass" type="password" autocomplete="current-password"></div>
+    <button class="btn" style="width:100%" id="aBtn" onclick="doAuth()">Entrar</button>
+    <p style="text-align:center;margin-top:12px">
+      <button class="link" id="aSwitch" onclick="switchAuth()">Não tem conta? Cadastre-se</button>
+    </p>
   </div>
 </div>
 
-<div id="app" style="display:none;">
-  <header>
-    <div class="logo">
-      <span style="font-size:24px;">&#9917;</span>
-      <div><h1>Kolecao das Copas</h1><small>COPA DO MUNDO 1970-2026</small></div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <span id="uname" style="font-size:12px;color:#C8A45A;"></span>
-      <button class="btn btn-out" style="font-size:12px;padding:5px 12px;" onclick="doSair()">Sair</button>
-    </div>
-  </header>
-  <nav id="main-nav">
-    <button class="active" onclick="setAba('dashboard')">Dashboard</button>
-    <button onclick="setAba('kolecao')">Kolecao</button>
-    <button onclick="setAba('transacoes')">Transacoes</button>
-    <button onclick="setAba('catalogo')">Catalogo</button>
-  </nav>
-  <main>
-    <div id="tab-dashboard"></div>
-    <div id="tab-kolecao" style="display:none;"></div>
-    <div id="tab-transacoes" style="display:none;"></div>
-    <div id="tab-catalogo" style="display:none;"></div>
-  </main>
-</div>
+<!-- ================= APLICATIVO ================= -->
+<div id="app" class="hide">
+  <div id="topbar">
+    <span class="logo">KOLEÇÃO</span>
+    <nav>
+      <button data-pg="dash" class="on" onclick="go('dash')">Painel</button>
+      <button data-pg="cat" onclick="go('cat')">Catálogo</button>
+      <button data-pg="kol" onclick="go('kol')">Koleção</button>
+      <button data-pg="tr" onclick="go('tr')">Transações</button>
+    </nav>
+    <span class="who" id="who"></span>
+    <button class="btn ghost sm" onclick="sair()">Sair</button>
+  </div>
 
-<!-- Modal Item -->
-<div class="overlay" id="m-item">
-  <div class="modal">
-    <div style="font-weight:700;font-size:15px;color:#002868;margin-bottom:14px;" id="m-item-title">Adicionar</div>
-    <div class="r2">
-      <div class="fg"><label>Copa *</label><select id="f-copa" onchange="onCopaChange()"></select></div>
-      <div class="fg"><label>Data (ddmmaa)</label><input id="f-data" maxlength="8" placeholder="ddmmaa" oninput="this.value=msk(this.value)"/></div>
+  <div id="wrap">
+    <!-- PAINEL -->
+    <div id="pg-dash" class="page on">
+      <h2 class="pg">Painel</h2>
+      <p class="sub">Visão geral da sua coleção e finanças.</p>
+      <div class="kpis" id="kpis"></div>
+      <div class="panel"><h3 style="margin-bottom:10px;color:var(--navy);font-size:15px">Progresso por álbum</h3><div id="progresso"></div></div>
     </div>
-    <div class="fg"><label>Tipo</label><select id="f-tipo" onchange="onTipoChange()"></select></div>
-    <div id="album-fields" style="display:none;background:#eff6ff;border-radius:8px;padding:12px;margin-bottom:12px;">
-      <div style="font-weight:600;font-size:12px;color:#002868;margin-bottom:8px;">Detalhes do album</div>
-      <div class="r3">
-        <div class="fg"><label>Estado</label><select id="f-aest" onchange="updateAlbumTags()"><option>Vazio</option><option>Incompleto</option><option>Completo</option></select></div>
-        <div class="fg"><label>Capa</label><select id="f-acap" onchange="updateAlbumTags()"><option>Mole</option><option>Dura</option></select></div>
-        <div class="fg"><label>Cor</label><input id="f-acor" placeholder="Ex: Azul" oninput="updateAlbumTags()"/></div>
-      </div>
-      <div class="r2">
-        <div class="fg"><label>Pais impressao</label><input id="f-apais" oninput="updateAlbumTags()"/></div>
-        <div class="fg"><label>Pais/Regiao</label><input id="f-areg" oninput="updateAlbumTags()"/></div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;"><input type="checkbox" id="f-acort" onchange="updateAlbumTags()"/> Cortesia do editor</label>
-      <div id="album-tags" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
-    </div>
-    <div id="fig-fields" style="display:none;">
-      <div class="fg" style="position:relative;">
-        <label>Buscar figurinha</label>
-        <input id="f-figbusca" placeholder="Ex: BRA1, Pele..." oninput="buscarFigs(this.value)"/>
-        <div class="sug-box" id="f-sugs" style="display:none;"></div>
-      </div>
-      <div class="fg">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <label style="margin:0;">Grade visual</label>
-          <button class="btn-sm" onclick="toggleGrade()">Abrir/Fechar grade</button>
+
+    <!-- CATÁLOGO -->
+    <div id="pg-cat" class="page">
+      <h2 class="pg">Catálogo</h2>
+      <p class="sub">Referência de álbuns e figurinhas. Copa do Mundo 2022 — Qatar.</p>
+      <div class="panel">
+        <div class="bar">
+          <select id="catEd" onchange="renderCat()">
+            <option value="670">Edição Tradicional (670)</option>
+            <option value="638">Edição Internacional (638)</option>
+          </select>
+          <select id="catSec" onchange="renderCat()"></select>
         </div>
-        <div class="grade-grid" id="f-grade" style="display:none;"></div>
-        <div id="f-sels" style="font-size:11px;color:#002868;margin-top:6px;display:none;"></div>
+        <div id="catBody"></div>
       </div>
     </div>
-    <div class="fg"><label>Descricao</label><input id="f-desc" placeholder="Ex: brilho, rara..."/></div>
-    <div class="r2">
-      <div class="fg"><label>Status</label><select id="f-status"></select></div>
-      <div class="fg"><label>Qtd</label><input id="f-qtd" type="number" min="1" value="1" oninput="updateValHint()"/></div>
-    </div>
-    <div class="val-mode">
-      <div class="mode-btns">
-        <button class="btn-sm" id="vm-total" onclick="setValMode('total')" style="background:#002868;color:#fff;font-weight:700;">Valor total</button>
-        <button class="btn-sm" id="vm-unit" onclick="setValMode('unit')">Por item</button>
+
+    <!-- KOLEÇÃO -->
+    <div id="pg-kol" class="page">
+      <h2 class="pg">Koleção</h2>
+      <p class="sub">Seus álbuns e figurinhas. Cada cadastro gera uma transação automaticamente.</p>
+      <div class="bar">
+        <button class="btn gold" onclick="modalAlbum()">+ Adicionar álbum</button>
+        <button class="btn gold" onclick="modalFig()">+ Adicionar figurinhas</button>
+        <button class="btn ghost" onclick="modalVendaLote()">Venda em lote</button>
+        <button class="btn ghost" onclick="modalSet()">Gerar Set Completo</button>
+        <button class="btn ghost" onclick="exportar()">Backup (exportar)</button>
       </div>
-      <input id="f-val" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateValHint()"/>
-      <div id="val-hint" style="font-size:11px;color:#6b7280;margin-top:4px;"></div>
+      <div class="panel"><h3 style="margin-bottom:8px;color:var(--navy);font-size:15px">Álbuns</h3><div id="listaAlbuns"></div></div>
+      <div class="panel"><h3 style="margin-bottom:8px;color:var(--navy);font-size:15px">Figurinhas avulsas</h3><div id="listaFig"></div></div>
+      <div class="panel"><h3 style="margin-bottom:8px;color:var(--navy);font-size:15px">Sets completos</h3><div id="listaSets"></div></div>
     </div>
-    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:10px;" id="f-gerar-wrap">
-      <input type="checkbox" id="f-gerar" checked/> Gerar registro de compra automatico
-    </label>
-    <div class="fg"><label>Observacoes</label><textarea id="f-obs" rows="2" placeholder="Notas..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-out" onclick="closeModal('m-item')">Cancelar</button>
-      <button class="btn btn-blue" onclick="salvarItem()">Salvar</button>
+
+    <!-- TRANSAÇÕES -->
+    <div id="pg-tr" class="page">
+      <h2 class="pg">Transações</h2>
+      <p class="sub"><span class="val neg">Vermelho</span> = saída (gasto/compra) · <span class="val pos">Verde</span> = entrada (venda).</p>
+      <div class="bar"><button class="btn gold" onclick="modalGasto()">+ Registrar gasto geral</button></div>
+      <div class="panel"><div id="listaTr"></div></div>
     </div>
   </div>
 </div>
 
-<!-- Modal Venda Unit -->
-<div class="overlay" id="m-vu">
-  <div class="modal" style="max-width:360px;margin-top:80px;">
-    <div style="font-weight:700;font-size:14px;color:#166534;margin-bottom:12px;">Registrar venda</div>
-    <div class="fg"><label>Valor (R$)</label><input id="vv" type="number" min="0" step="0.01" placeholder="0.00"/></div>
-    <div class="fg"><label>Vendido para</label><input id="vc" placeholder="Nome (opcional)"/></div>
-    <div class="fg"><label>Data (ddmmaa)</label><input id="vd" maxlength="8" oninput="this.value=msk(this.value)"/></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-out" onclick="closeModal('m-vu')">Cancelar</button>
-      <button class="btn" style="background:#166534;color:#fff;" onclick="salvarVendaUnit()">Confirmar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Venda Lote -->
-<div class="overlay" id="m-lv">
-  <div class="modal" style="max-width:580px;">
-    <div style="font-weight:700;font-size:14px;color:#002868;margin-bottom:4px;">Venda em lote</div>
-    <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Selecione os itens para vender.</div>
-    <div class="lote-list" id="lv-list"></div>
-    <div id="lv-count" style="font-size:11px;color:#002868;margin-bottom:8px;"></div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="btn-sm" id="lvm-t" onclick="setLVM('total')" style="background:#002868;color:#fff;font-weight:700;">Valor total</button>
-      <button class="btn-sm" id="lvm-i" onclick="setLVM('individual')">Por item</button>
-    </div>
-    <div id="lv-tf" class="fg">
-      <label>Valor total do lote (R$)</label>
-      <input id="lv-val" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateLVHint()"/>
-      <div id="lv-hint" style="font-size:11px;color:#6b7280;margin-top:3px;"></div>
-    </div>
-    <div id="lv-im" style="display:none;font-size:11px;color:#6b7280;margin-bottom:10px;">Digite o valor ao lado de cada item selecionado acima.</div>
-    <div class="r2">
-      <div class="fg"><label>Vendido para</label><input id="lv-comp" placeholder="Nome (opcional)"/></div>
-      <div class="fg"><label>Data (ddmmaa)</label><input id="lv-data" maxlength="8" oninput="this.value=msk(this.value)"/></div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-out" onclick="closeModal('m-lv')">Cancelar</button>
-      <button class="btn" id="lv-btn" style="background:#166534;color:#fff;" onclick="salvarLote()">Confirmar venda (0)</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Compra Lote -->
-<div class="overlay" id="m-lc">
-  <div class="modal" style="max-width:580px;">
-    <div style="font-weight:700;font-size:14px;color:#006847;margin-bottom:4px;">Compra em lote</div>
-    <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Selecione os itens para registrar compra.</div>
-    <div class="lote-list" id="lc-list"></div>
-    <div id="lc-count" style="font-size:11px;color:#006847;margin-bottom:8px;"></div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="btn-sm" id="lcm-t" onclick="setLCM('total')" style="background:#006847;color:#fff;font-weight:700;">Valor total</button>
-      <button class="btn-sm" id="lcm-i" onclick="setLCM('individual')">Por item</button>
-    </div>
-    <div id="lc-tf" class="fg">
-      <label>Valor total do lote (R$)</label>
-      <input id="lc-val" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateLCHint()"/>
-      <div id="lc-hint" style="font-size:11px;color:#6b7280;margin-top:3px;"></div>
-    </div>
-    <div id="lc-im" style="display:none;font-size:11px;color:#6b7280;margin-bottom:10px;">Digite o valor ao lado de cada item selecionado acima.</div>
-    <div class="r2">
-      <div class="fg"><label>Comprado de</label><input id="lc-comp" placeholder="Nome ou loja (opcional)"/></div>
-      <div class="fg"><label>Data (ddmmaa)</label><input id="lc-data" maxlength="8" oninput="this.value=msk(this.value)"/></div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-out" onclick="closeModal('m-lc')">Cancelar</button>
-      <button class="btn btn-green" id="lc-btn" onclick="salvarCLote()">Confirmar compra (0)</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Gasto Geral -->
-<div class="overlay" id="m-gg">
-  <div class="modal" style="max-width:420px;margin-top:80px;">
-    <div style="font-weight:700;font-size:14px;margin-bottom:12px;">Registrar gasto geral</div>
-    <div class="r2">
-      <div class="fg"><label>Tipo</label><select id="gg-t"><option>Compra</option><option>Venda</option><option>Troca</option></select></div>
-      <div class="fg"><label>Data (ddmmaa)</label><input id="gg-d" maxlength="8" oninput="this.value=msk(this.value)"/></div>
-    </div>
-    <div class="fg"><label>Copa (opcional)</label><select id="gg-c"></select></div>
-    <div class="fg"><label>Descricao *</label><input id="gg-desc" placeholder="Ex: frete, envelope..."/></div>
-    <div class="r2">
-      <div class="fg"><label>Quantidade</label><input id="gg-q" type="number" min="1" value="1"/></div>
-      <div class="fg"><label>Valor total (R$)</label><input id="gg-v" type="number" min="0" step="0.01" placeholder="0.00"/></div>
-    </div>
-    <div class="fg"><label>Contraparte</label><input id="gg-co" placeholder="Nome ou loja (opcional)"/></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-out" onclick="closeModal('m-gg')">Cancelar</button>
-      <button class="btn btn-blue" onclick="salvarGeral()">Salvar</button>
-    </div>
-  </div>
-</div>
+<!-- MODAL -->
+<div id="ov" class="hide"><div class="box" id="ovBox"></div></div>
 
 <script>
-var COPAS=[{a:"1970",p:"Mexico"},{a:"1974",p:"Alemanha Oc."},{a:"1978",p:"Argentina"},{a:"1982",p:"Espanha"},{a:"1986",p:"Mexico"},{a:"1990",p:"Italia"},{a:"1994",p:"EUA"},{a:"1998",p:"Franca"},{a:"2002",p:"Coreia/Japao"},{a:"2006",p:"Alemanha"},{a:"2010",p:"Africa do Sul"},{a:"2014",p:"Brasil"},{a:"2018",p:"Russia"},{a:"2022",p:"Qatar"},{a:"2026",p:"EUA/CAN/MEX"}];
-var TIPOS=["Figurinha","Album","Set Completo","Mascote","Bola","Poster","Pin","Card","Pacote","Outro"];
-var STATUS=["Colecao","Venda/Troca","Vendido","Perdido"];
-var SC={"Colecao":"#166534","Venda/Troca":"#1e40af","Vendido":"#991b1b","Perdido":"#92400e"};
-var SB={"Colecao":"#dcfce7","Venda/Troca":"#dbeafe","Vendido":"#fee2e2","Perdido":"#fef3c7"};
-var FIGS26=[{n:"FWC1",d:"Logotipo"},{n:"FWC2",d:"Trofeu"},{n:"FWC3",d:"Bola"},{n:"FWC4",d:"Taini"},{n:"BRA1",d:"Escudo CBF"},{n:"BRA2",d:"Alisson"},{n:"BRA3",d:"Ederson"},{n:"BRA4",d:"Militao"},{n:"BRA5",d:"Marquinhos"},{n:"BRA6",d:"Casemiro"},{n:"BRA7",d:"Gerson"},{n:"BRA8",d:"Paqueta"},{n:"BRA9",d:"Estevao"},{n:"BRA10",d:"Vinicius Jr"},{n:"BRA11",d:"Rodrygo"},{n:"BRA12",d:"Raphinha"},{n:"ARG1",d:"Escudo AFA"},{n:"ARG2",d:"E.Martinez"},{n:"ARG3",d:"Romero"},{n:"ARG4",d:"Otamendi"},{n:"ARG5",d:"De Paul"},{n:"ARG6",d:"Mac Allister"},{n:"ARG7",d:"Messi"},{n:"ARG8",d:"J.Alvarez"},{n:"ESP1",d:"Escudo ESP"},{n:"ESP2",d:"U.Simon"},{n:"ESP3",d:"Rodri"},{n:"ESP4",d:"Pedri"},{n:"ESP5",d:"Gavi"},{n:"ESP6",d:"L.Yamal"},{n:"ESP7",d:"N.Williams"},{n:"ESP8",d:"Morata"},{n:"ENG1",d:"Escudo ENG"},{n:"ENG2",d:"Pickford"},{n:"ENG3",d:"Bellingham"},{n:"ENG4",d:"Foden"},{n:"ENG5",d:"Saka"},{n:"ENG6",d:"H.Kane"},{n:"FRA1",d:"Escudo FRA"},{n:"FRA2",d:"Maignan"},{n:"FRA3",d:"Mbappe"},{n:"FRA4",d:"Griezmann"},{n:"FRA5",d:"Camavinga"},{n:"FRA6",d:"Tchouameni"},{n:"FRA7",d:"Thuram"},{n:"FRA8",d:"Barcola"}];
-var FIGS22=[{n:"FWC1",d:"Logotipo"},{n:"FWC2",d:"Trofeu"},{n:"FWC3",d:"Al Rihla"},{n:"FWC4",d:"Laeeb"},{n:"BRA1",d:"Escudo CBF"},{n:"BRA2",d:"Alisson"},{n:"BRA3",d:"Thiago Silva"},{n:"BRA4",d:"Marquinhos"},{n:"BRA5",d:"Casemiro"},{n:"BRA6",d:"Paqueta"},{n:"BRA7",d:"Neymar Jr"},{n:"BRA8",d:"Vinicius Jr"},{n:"BRA9",d:"Raphinha"},{n:"BRA10",d:"Richarlison"},{n:"ARG1",d:"Escudo AFA"},{n:"ARG2",d:"E.Martinez"},{n:"ARG3",d:"Otamendi"},{n:"ARG4",d:"De Paul"},{n:"ARG5",d:"Messi"},{n:"ARG6",d:"J.Alvarez"},{n:"FRA1",d:"Escudo FRA"},{n:"FRA2",d:"Lloris"},{n:"FRA3",d:"Mbappe"},{n:"FRA4",d:"Griezmann"}];
-var FIGS18=[{n:"1",d:"Logotipo"},{n:"2",d:"Trofeu"},{n:"3",d:"Zabivaka"},{n:"BRA1",d:"Escudo CBF"},{n:"BRA2",d:"Alisson"},{n:"BRA3",d:"Thiago Silva"},{n:"BRA4",d:"Marcelo"},{n:"BRA5",d:"Casemiro"},{n:"BRA6",d:"Coutinho"},{n:"BRA7",d:"Neymar Jr"},{n:"BRA8",d:"G.Jesus"},{n:"ARG1",d:"Escudo AFA"},{n:"ARG2",d:"Messi"},{n:"CRO1",d:"Escudo CRO"},{n:"CRO2",d:"Modric"},{n:"FRA1",d:"Escudo FRA"},{n:"FRA2",d:"Mbappe"},{n:"ENG1",d:"Escudo ENG"},{n:"ENG2",d:"Kane"}];
-function getFigs(a){if(a==="2026")return FIGS26;if(a==="2022")return FIGS22;if(a==="2018")return FIGS18;var r=[];for(var i=0;i<16;i++)r.push({n:String(i+1),d:"Figurinha "+(i+1)});return r;}
+/* ============================================================
+   CONFIGURAÇÃO DO SUPABASE
+   Preencha as duas linhas abaixo com os dados do seu projeto.
+   (Painel Supabase > Project Settings > API)
+   ============================================================ */
+const SUPABASE_URL  = "https://idkvsqikmuxnbkyurdsr.supabase.co";
+const SUPABASE_ANON = "sb_publishable_Kh7EFfBrs64rCYYO4ogQrA_Rp7hPpz7";
+/* ============================================================ */
 
-function gid(){return Math.random().toString(36).slice(2,9);}
-function msk(v){var n=v.replace(/\D/g,"").slice(0,6);if(n.length<=2)return n;if(n.length<=4)return n.slice(0,2)+"/"+n.slice(2);return n.slice(0,2)+"/"+n.slice(2,4)+"/"+n.slice(4);}
-function toS(d){if(!d)return"";var p=d.split("/");if(p.length===3)return"20"+p[2]+"-"+p[1]+"-"+p[0];return d;}
-function toD(d){if(!d)return"--";if(d.indexOf("-")>=0){var p=d.split("-");return p[2]+"/"+p[1]+"/"+p[0].slice(2);}return d;}
-function hj(){var d=new Date();return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+String(d.getFullYear()).slice(2);}
-function pad(n){return n<10?"0"+n:String(n);}
-function lg(k,df){try{var v=localStorage.getItem(k);return v?JSON.parse(v):df;}catch(e){return df;}}
-function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function fmt(v){return v>0?"R$"+v.toFixed(2):"--";}
-function bdg(s){return'<span class="badge" style="background:'+(SB[s]||"#f3f4f6")+';color:'+(SC[s]||"#374151")+'"><span class="dot" style="background:'+(SC[s]||"#6b7280")+'"></span>'+s+'</span>';}
+/* ---------- CATÁLOGO COPA 2022 ---------- */
+const TEAMS = [
+{c:'QAT',n:'Qatar',g:'A',e:'Qatar FA',p:['Saad Al Sheeb','Meshaal Barsham','Homam Ahmed','Bassam Alrawi','Abdulkarim Hassan','Musaab Khidir','Boualem Khoukhi','Pedro Miguel','Tarek Salman','Karim Boudiaf','Abdulaziz Hatem','Assim Omer Madibo','Yousuf Abdurisag','Akram Hassan Afif','Ahmad Alaaeldin','Hasan Al-Haydos','Almoez Ali','Mohammed Muntari']},
+{c:'ECU',n:'Equador',g:'A',e:'FEF',p:['Hernán Galíndez','Alexander Domínguez','Robert Arboleda','Byron Castillo','Pervis Estupiñán','Piero Hincapié','Ángelo Preciado','Félix Torres','Moisés Caicedo','Alan Franco','Carlos Gruezo','Jhegson Méndez','Jeremy Sarmiento','Michael Estrada','Ángel Mena','Gonzalo Plata','Ayrton Preciado','Enner Valencia']},
+{c:'SEN',n:'Senegal',g:'A',e:'FSF',p:['Édouard Mendy','Alfred Gomis','Saliou Ciss','Pape Abou Cissé','Abdou Diallo','Kalidou Koulibaly','Ibrahima Mbaye','Bouna Sarr','Krépin Diatta','Idrissa Gueye','Pape Gueye','Cheikhou Kouyaté','Nampalys Mendy','Boulaye Dia','Famara Diédhiou','Bamba Dieng','Sadio Mané','Ismaïla Sarr']},
+{c:'NED',n:'Holanda',g:'A',e:'KNVB',p:['Justin Bijlow','Jasper Cillessen','Daley Blind','Matthijs de Ligt','Stefan de Vrij','Denzel Dumfries','Virgil van Dijk','Steven Berghuis','Frenkie de Jong','Ryan Gravenberch','Davy Klaassen','Teun Koopmeiners','Georginio Wijnaldum','Steven Bergwijn','Arnaut Danjuma','Memphis Depay','Cody Gakpo','Donyell Malen']},
+{c:'ENG',n:'Inglaterra',g:'B',e:'FA',p:['Jordan Pickford','Aaron Ramsdale','Trent Alexander-Arnold','Conor Coady','Harry Maguire','Luke Shaw','John Stones','Kyle Walker','Jude Bellingham','Jack Grealish','Jordan Henderson','Mason Mount','Kalvin Phillips','Declan Rice','Phil Foden','Harry Kane','Bukayo Saka','Raheem Sterling']},
+{c:'IRN',n:'Irã',g:'B',e:'FFIRI',p:['Amir Abedzadeh','Alireza Beiranvand','Ehsan Hajsafi','Majid Hosseini','Hossein Kanaani','Shoja Khalilzadeh','Milad Mohammadi','Sadegh Moharrami','Omid Noorafkan','Vahid Amiri','Saeid Ezatolahi','Ali Gholizadeh','Alireza Jahanbakhsh','Ahmad Nourollahi','Karim Ansarifard','Sardar Azmoun','Saman Ghoddos','Mehdi Taremi']},
+{c:'USA',n:'EUA',g:'B',e:'US Soccer',p:['Matt Turner','Zack Steffen','Sergiño Dest','Aaron Long','Chris Richards','Antonee Robinson','DeAndre Yedlin','Walker Zimmerman','Brenden Aaronson','Kellyn Acosta','Tyler Adams','Weston McKennie','Yunus Musah','Jesús Ferreira','Ricardo Pepi','Christian Pulisic','Giovanni Reyna','Timothy Weah']},
+{c:'WAL',n:'País de Gales',g:'B',e:'FAW',p:['Danny Ward','Wayne Hennessey','Ethan Ampadu','Ben Davies','Chris Gunter','Chris Mepham','Connor Roberts','Joe Rodon','Neco Williams','Joe Allen','Joe Morrell','Aaron Ramsey','Jonathan Williams','Harry Wilson','Gareth Bale','Daniel James','Brennan Johnson','Kieffer Moore']},
+{c:'ARG',n:'Argentina',g:'C',e:'AFA',p:['Emiliano Martínez','Franco Armani','Marcos Acuña','Nahuel Molina','Nicolás Otamendi','Germán Pezzella','Cristian Romero','Rodrigo De Paul','Ángel Di María','Giovani Lo Celso','Leandro Paredes','Guido Rodríguez','Julián Álvarez','Joaquín Correa','Alejandro Gómez','Nicolás González','Lautaro Martínez','Lionel Messi']},
+{c:'KSA',n:'Arábia Saudita',g:'C',e:'SAFF',p:['Mohammed Al-Owais','Mohammed Al-Rubaie','Abdulelah Al-Amri','Ali Al-Boleahi','Mohammed Al-Burayk','Sultan Al-Ghannam','Yasser Al-Shahrani','Hassan Al-Tambakti','Abdullah Madu','Salman Al-Faraj','Abdulelah Al-Malki','Sami Al-Najei','Hattan Bahebri','Mohamed Kanno','Abdullah Otayf','Firas Al-Buraikan','Salem Al-Dawsari','Khalid Al-Ghannam']},
+{c:'MEX',n:'México',g:'C',e:'FMF',p:['Guillermo Ochoa','Alfredo Talavera','Néstor Araújo','Jesús Gallardo','César Montes','Héctor Moreno','Luis Romo','Jorge Sánchez','Edson Álvarez','Jesús Manuel Corona','Andrés Guardado','Érick Gutiérrez','Héctor Herrera','Diego Lainez','Carlos Rodríguez','Rogelio Funes Mori','Raúl Jiménez','Hirving Lozano']},
+{c:'POL',n:'Polônia',g:'C',e:'PZPN',p:['Wojciech Szczęsny','Łukasz Skorupski','Jan Bednarek','Bartosz Bereszyński','Matty Cash','Kamil Glik','Tymoteusz Puchacz','Maciej Rybus','Kamil Jóźwiak','Mateusz Klich','Grzegorz Krychowiak','Jakub Moder','Sebastian Szymański','Piotr Zieliński','Robert Lewandowski','Arkadiusz Milik','Krzysztof Piątek','Karol Świderski']},
+{c:'FRA',n:'França',g:'D',e:'FFF',p:['Hugo Lloris','Mike Maignan','Lucas Hernández','Theo Hernández','Presnel Kimpembe','Jules Koundé','Benjamin Pavard','Raphaël Varane',"N'Golo Kanté",'Paul Pogba','Adrien Rabiot','Aurélien Tchouaméni','Wissam Ben Yedder','Karim Benzema','Kingsley Coman','Antoine Griezmann','Kylian Mbappé','Christopher Nkunku']},
+{c:'AUS',n:'Austrália',g:'D',e:'Football Australia',p:['Mathew Ryan','Andrew Redmayne','Aziz Behich','Miloš Degenek','Rhyan Grant','Joel King','Trent Sainsbury','Harry Souttar','Ajdin Hrustić','Jackson Irvine','James Jeggo','Awer Mabil','Aaron Mooy','Martin Boyle','Mitchell Duke','Craig Goodwin','Mathew Leckie','Adam Taggart']},
+{c:'DEN',n:'Dinamarca',g:'D',e:'DBU',p:['Kasper Schmeichel','Frederik Rønnow','Andreas Christensen','Simon Kjær','Joakim Mæhle','Jens Stryger Larsen','Jannik Vestergaard','Mikkel Damsgaard','Thomas Delaney','Christian Eriksen','Pierre Emile Højbjerg','Christian Nørgaard','Daniel Wass','Martin Braithwaite','Kasper Dolberg','Yussuf Poulsen','Andreas Skov Olsen','Jonas Wind']},
+{c:'TUN',n:'Tunísia',g:'D',e:'FTF',p:['Bechir Ben Saïd','Farouk Ben Mustapha','Dylan Bronn','Mohamed Dräger','Bilel Ifa','Ali Maâloul','Hamza Mathlouthi','Yassine Meriah','Montassar Talbi','Mohamed Ali Ben Romdhane','Wahbi Khazri','Aïssa Laïdouni','Ferjani Sassi','Ellyes Skhiri','Anis Slimane','Seifeddine Jaziri','Youssef Msakni','Naïm Sliti']},
+{c:'ESP',n:'Espanha',g:'E',e:'RFEF',p:['Unai Simón','Robert Sánchez','César Azpilicueta','Eric García','Jordi Alba','Aymeric Laporte','Pau Torres','Gavi','Koke','Marcos Llorente','Pedri','Rodri','Sergio Busquets','Dani Olmo','Ansu Fati','Ferran Torres','Álvaro Morata','Pablo Sarabia']},
+{c:'CRC',n:'Costa Rica',g:'E',e:'FEDEFUTBOL',p:['Keylor Navas','Leonel Moreira','Ricardo Blanco','Francisco Calvo','Óscar Duarte','Keysher Fuller','Bryan Oviedo','Juan Pablo Vargas','Kendall Waston','Celso Borges','Orlando Galo','Bryan Ruiz','Yeltsin Tejeda','Jewison Bennette','Joel Campbell','Anthony Contreras','Gerson Torres','Johan Venegas']},
+{c:'GER',n:'Alemanha',g:'E',e:'DFB',p:['Manuel Neuer','Marc-André ter Stegen','Matthias Ginter','Robin Gosens','Thilo Kehrer','David Raum','Antonio Rüdiger','Niklas Süle','Leon Goretzka','İlkay Gündoğan','Kai Havertz','Jonas Hofmann','Joshua Kimmich','Serge Gnabry','Thomas Müller','Marco Reus','Leroy Sané','Timo Werner']},
+{c:'JPN',n:'Japão',g:'E',e:'JFA',p:['Shuichi Gonda','Eiji Kawashima','Yuto Nagatomo','Yuta Nakayama','Takehiro Tomiyasu','Miki Yamane','Maya Yoshida','Wataru Endo','Genki Haraguchi','Hidemasa Morita','Gaku Shibasaki','Ao Tanaka','Takuma Asano','Kyogo Furuhashi','Junya Ito','Takumi Minamino','Kaoru Mitoma','Yuya Osako']},
+{c:'BEL',n:'Bélgica',g:'F',e:'RBFA',p:['Thibaut Courtois','Simon Mignolet','Toby Alderweireld','Timothy Castagne','Jason Denayer','Thomas Meunier','Jan Vertonghen','Yannick Carrasco','Kevin De Bruyne','Charles De Ketelaere','Thorgan Hazard','Youri Tielemans','Hans Vanaken','Axel Witsel','Jérémy Doku','Eden Hazard','Romelu Lukaku','Dries Mertens']},
+{c:'CAN',n:'Canadá',g:'F',e:'Canada Soccer',p:['Milan Borjan','Maxime Crépeau','Samuel Adekugbe','Doneil Henry','Alistair Johnston','Richie Laryea','Kamal Miller','Steven Vitória','Tajon Buchanan','Alphonso Davies','Stephen Eustaquio','Atiba Hutchinson','Mark-Anthony Kaye','Jonathan Osorio','Samuel Piette','Jonathan David','David Junior Hoilett','Cyle Larin']},
+{c:'MAR',n:'Marrocos',g:'F',e:'FRMF',p:['Yassine Bounou','Munir Mohamedi','Nayef Aguerd','Achraf Hakimi','Adam Masina','Samy Mmaee','Romain Saïss','Selim Amallah','Sofyan Amrabat','Aymen Barkok','Ilias Chair','Imran Louza','Azzedine Ounahi','Abdelhamid Sabiri','Sofiane Boufal','Youssef En-Nesyri','Ryan Mmaee','Hakim Ziyech']},
+{c:'CRO',n:'Croácia',g:'F',e:'HNS',p:['Dominik Livaković','Ivo Grbić','Borna Barišić','Domagoj Vida','Josip Juranović','Dejan Lovren','Joško Gvardiol','Marcelo Brozović','Luka Modrić','Mateo Kovačić','Nikola Vlašić','Ivan Perišić','Ante Rebić','Mario Pašalić','Andrej Kramarić','Bruno Petković','Marko Livaja','Ivan Rakitić']},
+{c:'BRA',n:'Brasil',g:'G',e:'CBF',p:['Alisson','Ederson','Alex Sandro','Danilo','Éder Militão','Marquinhos','Thiago Silva','Casemiro','Philippe Coutinho','Fabinho','Fred','Lucas Paquetá','Antony','Gabriel Jesus','Neymar Jr','Raphinha','Richarlison','Vinícius Jr']},
+{c:'SRB',n:'Sérvia',g:'G',e:'FSS',p:['Predrag Rajković','Vanja Milinković-Savić','Nikola Milenković','Strahinja Pavlović','Dušan Tadić','Saša Lukić','Nemanja Radonjić','Sergio Milinković-Savić','Ivan Ilić','Filip Kostić','Andrija Živković','Aleksandar Mitrović','Dušan Vlahović','Luka Jović','Nemanja Gudelj','Marko Grujić','Stefan Mitrović','Darko Lazović']},
+{c:'SUI',n:'Suíça',g:'G',e:'SFV',p:['Yann Sommer','Gregor Kobel','Silvan Widmer','Manuel Akanji','Fabian Schär','Ricardo Rodríguez','Nico Elvedi','Denis Zakaria','Granit Xhaka','Remo Freuler','Xherdan Shaqiri','Ruben Vargas','Djibril Sow','Steven Zuber','Haris Seferović','Breel Embolo','Noah Okafor','Renato Steffen']},
+{c:'CMR',n:'Camarões',g:'G',e:'FECAFOOT',p:['André Onana','Devis Epassy','Jean-Charles Castelletto','Collins Fai','Olivier Mbaizo','Harold Moukoudi','Michael Ngadeu','Nouhou','Martin Hongla','Pierre Kunde','James Léa Siliki','Samuel Oum Gouet','André-Frank Zambo Anguissa','Vincent Aboubakar','Stéphane Bahoken','Nicolas Moumi Ngamaleu','Karl Toko Ekambi','Eric Maxim Choupo-Moting']},
+{c:'POR',n:'Portugal',g:'H',e:'FPF',p:['Diogo Costa','Rui Patrício','João Cancelo','José Fonte','Nuno Mendes','Pepe','Raphaël Guerreiro','Rúben Dias','Bernardo Silva','Bruno Fernandes','Danilo Pereira','João Moutinho','Renato Sanches','Rúben Neves','André Silva','Cristiano Ronaldo','Diogo Jota','Gonçalo Guedes']},
+{c:'GHA',n:'Gana',g:'H',e:'GFA',p:['Joe Wollacott','Richard Ofori','Andy Yiadom','Alexander Djiku','Daniel Amartey','Gideon Mensah','Tariq Lamptey','Iddrisu Baba','Thomas Partey','Mohammed Kudus','Salis Abdul Samed','Daniel-Kofi Kyereh','Kamal Sowah','Felix Afena-Gyan','Jordan Ayew','André Ayew','Osman Bukari','Kamaldeen Sulemana']},
+{c:'URU',n:'Uruguai',g:'H',e:'AUF',p:['Fernando Muslera','Sergio Rochet','Ronald Araújo','Martín Cáceres','José María Giménez','Diego Godín','Mathías Olivera','Matías Viña','Rodrigo Bentancur','Giorgian De Arrascaeta','Nicolás De La Cruz','Lucas Torreira','Federico Valverde','Matías Vecino','Edinson Cavani','Darwin Núñez','Facundo Pellistri','Luis Suárez']},
+{c:'KOR',n:'Coreia do Sul',g:'H',e:'KFA',p:['Seung-gyu Kim','Hyeon-woo Jo','Chul Hong','Tae-hwan Kim','Min-jae Kim','Young-gwon Kim','Jin-su Kim','Yong Lee','In-beom Hwang','Woo-young Jung','Jae-sung Lee','Seung-ho Paik','Gue-sung Cho','Hee-chan Hwang','Ui-jo Hwang','Chang-hoon Kwon','Heung-min Son','Min-kyu Song']}
+];
+const FWC670=[['FWC1','Logo Copa 2022'],['FWC2','Troféu FIFA'],['FWC3','Al Rihla — bola oficial'],['FWC4',"La'eeb — mascote"],['FWC5','Estádio Al Bayt'],['FWC6','Estádio Lusail'],['FWC7','Estádio Al Janoub'],['FWC8','Estádio Ahmad Bin Ali'],['FWC9','Estádio Al Thumama'],['FWC10','Estádio Education City'],['FWC11','Estádio Khalifa International'],['FWC12','Estádio 974'],['FWC13','Figurinha 00'],['FWC19','Uruguai 1930'],['FWC20','Itália 1938'],['FWC21','Brasil 1958'],['FWC22','Inglaterra 1966'],['FWC23','Brasil 1970'],['FWC24','Argentina 1978'],['FWC25','Itália 1982'],['FWC26','Alemanha 1990'],['FWC27','França 1998'],['FWC28','Espanha 2010'],['FWC29','França 2018']];
+const FWC638=[['00','Logo Panini'],['FWC1','FIFA'],['FWC2','Troféu 1/2'],['FWC3','Troféu 2/2'],['FWC4','Mascote 1/2'],['FWC5','Mascote 2/2'],['FWC6','Logo 1/2'],['FWC7','Logo 2/2'],['FWC8','Ahmad Bin Ali Stadium'],['FWC9','Al Janoub Stadium'],['FWC10','Al Thumama Stadium'],['FWC11','Education City Stadium'],['FWC12','Khalifa International Stadium'],['FWC13','Stadium 974'],['FWC14','Al Bayt Stadium (exterior)'],['FWC15','Al Bayt Stadium (interior)'],['FWC16','Lusail Stadium (exterior)'],['FWC17','Lusail Stadium (interior)'],['FWC18','Bola oficial Al Rihla']];
+const ALBUNS=[
+{code:'ALB2022-BR-SM',nome:'Tradicional Brasil — Capa Mole',ed:'670'},
+{code:'ALB2022-BR-CD',nome:'Tradicional Brasil — Capa Dura',ed:'670'},
+{code:'ALB2022-BRPRATA',nome:'Brasil — Capa Dura Prata',ed:'670'},
+{code:'ALB2022-BROURO',nome:'Brasil — Capa Dura Ouro (não numerado)',ed:'670'},
+{code:'ALB2022-BROURO-NUM',nome:'Brasil — Capa Dura Ouro NUMERADO (Kit Estádio 1ª ed.)',ed:'670'},
+{code:'ALB2022-IT-SM',nome:'Made in Italy — Capa Mole',ed:'670'},
+{code:'ALB2022-IT-CD',nome:'Made in Italy — Capa Dura',ed:'670'},
+{code:'ALB2022-ORYXSM',nome:'Oryx Edition — Capa Mole (Suíça)',ed:'670'},
+{code:'ALB2022-ORYXCD',nome:'Oryx Treasure Box — Capa Dura (Suíça)',ed:'670'},
+{code:'ALB2022-USASM',nome:'USA Edition — Capa Mole',ed:'670'},
+{code:'ALB2022-USACD',nome:'USA Edition — Capa Dura',ed:'670'},
+{code:'ALB2022-INTL-BR',nome:'Internacional — Made in Brazil',ed:'638'},
+{code:'ALB2022-INTL-IT',nome:'Internacional — Made in Italy',ed:'638'},
+{code:'ALB2022-INTL-ARG',nome:'Internacional — Industria Argentina',ed:'638'}
+];
 
-var sess=null,itens=[],trans=[],catFigsStore={};
-var abaAtual="dashboard",editId=null,vendaId=null,obsOpenId=null;
-var loteIds=[],lvMode="total",lcMode="total";
-var valMode="total",gradeOpen=false,figQtds={};
-var kf={ano:"",tipo:"",status:""};
-
-function saveData(){if(sess)lss("kc_d_"+sess.email,{itens:itens,trans:trans});}
-
-function showTab(t){
-  document.getElementById("form-login").style.display=t==="login"?"block":"none";
-  document.getElementById("form-reg").style.display=t==="reg"?"block":"none";
-  document.getElementById("tab-login").style.cssText=t==="login"?"background:#dbeafe;color:#002868;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  document.getElementById("tab-reg").style.cssText=t==="reg"?"background:#dbeafe;color:#002868;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-}
-
-function doLogin(){
-  var users=lg("kc_u",[]);
-  var e=document.getElementById("le").value;
-  var s=document.getElementById("ls").value;
-  var u=null;
-  for(var i=0;i<users.length;i++){if(users[i].email===e&&users[i].senha===s){u=users[i];break;}}
-  if(!u){var el=document.getElementById("lerr");el.textContent="E-mail ou senha invalidos.";el.style.display="block";return;}
-  startApp(u);
-}
-
-function doReg(){
-  var users=lg("kc_u",[]);
-  var n=document.getElementById("rn").value;
-  var e=document.getElementById("re").value;
-  var s=document.getElementById("rs").value;
-  var el=document.getElementById("rerr");
-  if(!n||!e||!s){el.textContent="Preencha todos os campos.";el.style.display="block";return;}
-  for(var i=0;i<users.length;i++){if(users[i].email===e){el.textContent="E-mail ja cadastrado.";el.style.display="block";return;}}
-  var u={nome:n,email:e,senha:s};
-  users.push(u);lss("kc_u",users);
-  startApp(u);
-}
-
-function startApp(u){
-  sess=u;lss("kc_s",u);
-  var d=lg("kc_d_"+u.email,{itens:[],trans:[]});
-  itens=d.itens||[];trans=d.trans||[];
-  catFigsStore=lg("kc_cf_"+u.email,{});
-  document.getElementById("auth-screen").style.display="none";
-  document.getElementById("app").style.display="block";
-  document.getElementById("uname").textContent="Ola, "+u.nome.split(" ")[0];
-  initSelects();
-  renderAba();
-}
-
-function doSair(){
-  sess=null;localStorage.removeItem("kc_s");
-  document.getElementById("app").style.display="none";
-  document.getElementById("auth-screen").style.display="flex";
-}
-
-function initSelects(){
-  var sc=document.getElementById("f-copa");
-  sc.innerHTML='<option value="">Selecione</option>';
-  for(var i=0;i<COPAS.length;i++)sc.innerHTML+='<option value="'+COPAS[i].a+'">'+COPAS[i].a+' - '+COPAS[i].p+'</option>';
-  var st=document.getElementById("f-tipo");
-  st.innerHTML="";
-  for(var i=0;i<TIPOS.length;i++)st.innerHTML+='<option>'+TIPOS[i]+'</option>';
-  var ss=document.getElementById("f-status");
-  ss.innerHTML="";
-  for(var i=0;i<STATUS.length;i++)ss.innerHTML+='<option>'+STATUS[i]+'</option>';
-  var gc=document.getElementById("gg-c");
-  gc.innerHTML='<option value="">-- Sem copa especifica --</option>';
-  for(var i=0;i<COPAS.length;i++)gc.innerHTML+='<option value="'+COPAS[i].a+'">'+COPAS[i].a+' - '+COPAS[i].p+'</option>';
-}
-
-function setAba(a){
-  abaAtual=a;
-  var btns=document.querySelectorAll("nav button");
-  var tabs=["dashboard","kolecao","transacoes","catalogo"];
-  for(var i=0;i<btns.length;i++)btns[i].className=tabs[i]===a?"active":"";
-  for(var i=0;i<tabs.length;i++)document.getElementById("tab-"+tabs[i]).style.display=tabs[i]===a?"block":"none";
-  renderAba();
-}
-
-function renderAba(){
-  if(abaAtual==="dashboard")renderDash();
-  else if(abaAtual==="kolecao")renderKolecao();
-  else if(abaAtual==="transacoes")renderTrans();
-  else if(abaAtual==="catalogo")renderCat();
-}
-
-function renderDash(){
-  var tC=0,tV=0;
-  for(var i=0;i<trans.length;i++){if(trans[i].tipo==="Compra")tC+=trans[i].total;else if(trans[i].tipo==="Venda")tV+=trans[i].total;}
-  var sl=tV-tC;
-  var tot=0;for(var i=0;i<itens.length;i++)tot+=itens[i].quantidade;
-  var copSet={};for(var i=0;i<itens.length;i++)copSet[itens[i].copa]=1;
-  var copas=Object.keys(copSet).length;
-  var h='<div class="grid-metrics">';
-  h+='<div class="metric" style="border-color:#002868;background:#dbeafe;"><div class="ml">Itens</div><div class="mv" style="color:#002868;">'+tot+'</div></div>';
-  h+='<div class="metric" style="border-color:#006847;background:#dcfce7;"><div class="ml">Copas</div><div class="mv" style="color:#006847;">'+copas+'</div></div>';
-  h+='<div class="metric" style="border-color:#991b1b;background:#fee2e2;"><div class="ml">Investido</div><div class="mv" style="color:#991b1b;">R$'+tC.toFixed(2)+'</div></div>';
-  h+='<div class="metric" style="border-color:#166534;background:#dcfce7;"><div class="ml">Arrecadado</div><div class="mv" style="color:#166534;">R$'+tV.toFixed(2)+'</div></div>';
-  var sc=sl>=0?"#166534":"#991b1b",sb=sl>=0?"#dcfce7":"#fee2e2";
-  h+='<div class="metric" style="border-color:'+sc+';background:'+sb+';"><div class="ml">Saldo</div><div class="mv" style="color:'+sc+';">R$'+sl.toFixed(2)+'</div></div></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
-  h+='<div class="card"><div style="font-weight:700;font-size:13px;color:#002868;margin-bottom:8px;">Por status</div>';
-  for(var i=0;i<STATUS.length;i++){var s=STATUS[i];var q=0;for(var j=0;j<itens.length;j++)if(itens[j].status===s)q+=itens[j].quantidade;if(q>0)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid #e5e7eb;">'+bdg(s)+'<strong style="color:#002868;">'+q+'</strong></div>';}
-  if(!itens.length)h+='<div style="color:#9ca3af;font-size:12px;">Nenhum item ainda.</div>';
-  h+='</div><div class="card"><div style="font-weight:700;font-size:13px;color:#002868;margin-bottom:8px;">Copas na kolecao</div>';
-  var found=false;
-  for(var i=0;i<COPAS.length;i++){var c=COPAS[i];var hasItem=false;for(var j=0;j<itens.length;j++)if(itens[j].copa===c.a){hasItem=true;break;}if(hasItem){found=true;var cnt=0;for(var j=0;j<itens.length;j++)if(itens[j].copa===c.a)cnt++;h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #e5e7eb;font-size:12px;"><span>'+c.a+' - '+c.p+'</span><strong style="color:#002868;">'+cnt+'</strong></div>';}}
-  if(!found)h+='<div style="color:#9ca3af;font-size:12px;">Nenhuma copa ainda.</div>';
-  h+='</div></div>';
-  document.getElementById("tab-dashboard").innerHTML=h;
-}
-
-function renderKolecao(){
-  var h='<div class="row-flex"><div style="font-size:15px;font-weight:700;color:#002868;">Minha Kolecao</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;">';
-  h+='<button class="btn btn-out" onclick="openLV()">Venda lote</button>';
-  h+='<button class="btn btn-out" style="color:#006847;border-color:#006847;" onclick="openLC()">Compra lote</button>';
-  h+='<button class="btn btn-blue" onclick="openItem(null)">+ Adicionar</button></div></div>';
-  h+='<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">';
-  h+='<select onchange="kf.ano=this.value;renderKBody()" style="width:auto;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;"><option value="">Todas as copas</option>';
-  for(var i=0;i<COPAS.length;i++)h+='<option value="'+COPAS[i].a+'">'+COPAS[i].a+'</option>';
-  h+='</select><select onchange="kf.tipo=this.value;renderKBody()" style="width:auto;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;"><option value="">Todos os tipos</option>';
-  for(var i=0;i<TIPOS.length;i++)h+='<option>'+TIPOS[i]+'</option>';
-  h+='</select><select onchange="kf.status=this.value;renderKBody()" style="width:auto;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;"><option value="">Todos os status</option>';
-  for(var i=0;i<STATUS.length;i++)h+='<option>'+STATUS[i]+'</option>';
-  h+='</select></div>';
-  h+='<div class="card" style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Copa</th><th>Tipo</th><th>Qtd</th><th>Tags</th><th>Status</th><th>Val.Unit</th><th>Total</th><th>Acoes</th></tr></thead><tbody id="k-tbody"></tbody></table></div>';
-  document.getElementById("tab-kolecao").innerHTML=h;
-  renderKBody();
-}
-
-function getFiltered(){
-  var r=[];
-  for(var i=0;i<itens.length;i++){
-    var it=itens[i];
-    if(kf.ano&&it.copa!==kf.ano)continue;
-    if(kf.tipo&&it.tipo!==kf.tipo)continue;
-    if(kf.status&&it.status!==kf.status)continue;
-    r.push(it);
-  }
-  return r;
-}
-
-function renderKBody(){
-  var tb=document.getElementById("k-tbody");
-  if(!tb)return;
-  var arr=getFiltered();
-  if(!arr.length){tb.innerHTML='<tr><td colspan="9" style="color:#9ca3af;font-size:12px;padding:12px;">Nenhum item.</td></tr>';return;}
-  var h="";
-  for(var i=0;i<arr.length;i++){
-    var it=arr[i];
-    var vc=it.status==="Vendido"?"#166534":"#991b1b";
-    var tags="";
-    if(it.tipo==="Album"){
-      var ts=[it.aEst,it.aCap,it.aCor,it.aCort?"Cortesia":null,it.aReg,it.aPais];
-      for(var j=0;j<ts.length;j++)if(ts[j])tags+='<span class="pill">'+ts[j]+'</span>';
+/* gera a lista completa de cromos de uma edição */
+function cromosEdicao(ed){
+  const out=[];
+  TEAMS.forEach(t=>{
+    if(ed==='670'){
+      out.push({num:t.c+'1',desc:t.n+' — Foto do grupo',sec:t.c});
+      out.push({num:t.c+'2',desc:'Escudo '+t.e,sec:t.c});
+      t.p.forEach((nm,i)=>out.push({num:t.c+(i+3),desc:nm,sec:t.c}));
+    }else{
+      out.push({num:t.c+'1',desc:'Escudo '+t.e,sec:t.c});
+      t.p.forEach((nm,i)=>out.push({num:t.c+(i+2),desc:nm,sec:t.c}));
     }
-    var nf=it.numFig?(' <strong style="color:#002868;">#'+it.numFig+'</strong>'):"";
-    h+='<tr><td>'+toD(it.data)+'</td><td>'+it.copa+'</td><td>'+it.tipo+nf+'</td><td>'+it.quantidade+'</td><td>'+tags+'</td><td>'+bdg(it.status)+'</td>';
-    h+='<td style="color:'+vc+';font-weight:600;">'+fmt(it.valorUnit)+'</td>';
-    h+='<td style="color:'+vc+';font-weight:700;">'+(it.valorUnit>0?"R$"+(it.valorUnit*it.quantidade).toFixed(2):"--")+'</td>';
-    h+='<td style="white-space:nowrap;">';
-    if(it.obs)h+='<button class="btn-sm" style="color:#92400e;margin-right:2px;" onclick="toggleObs(\''+it.id+'\')">obs</button>';
-    h+='<button class="btn-sm" style="color:#166534;margin-right:2px;" onclick="openVU(\''+it.id+'\')">vender</button>';
-    h+='<button class="btn-sm" style="color:#002868;margin-right:2px;" onclick="openItem(\''+it.id+'\')">editar</button>';
-    h+='<button class="btn-sm" style="color:#991b1b;" onclick="excluir(\''+it.id+'\')">excluir</button></td></tr>';
-    if(obsOpenId===it.id)h+='<tr class="obs-row"><td colspan="9"><strong>Obs:</strong> '+it.obs+'</td></tr>';
+  });
+  (ed==='670'?FWC670:FWC638).forEach(f=>out.push({num:f[0],desc:f[1],sec:'FWC'}));
+  return out;
+}
+function cromosSecao(ed,sec){return cromosEdicao(ed).filter(x=>x.sec===sec);}
+
+/* ---------- ESTADO ---------- */
+let sb=null, USER=null;
+let ST={albuns:[],figurinhas:[],transacoes:[],sets:[]};
+let authMode='login';
+
+/* ---------- UTILIDADES ---------- */
+const $=id=>document.getElementById(id);
+const money=v=>'R$ '+(Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hojeISO=()=>new Date().toISOString().slice(0,10);
+function isoParaBr(iso){if(!iso)return'';const p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0].slice(2);}
+function brParaIso(br){const d=(br||'').replace(/\D/g,'');if(d.length<6)return null;const dd=d.slice(0,2),mm=d.slice(2,4),aa=d.slice(4,6);return '20'+aa+'-'+mm+'-'+dd;}
+/* máscara de data: digita só números */
+function maskData(el){el.addEventListener('input',()=>{let d=el.value.replace(/\D/g,'').slice(0,6);let o=d;if(d.length>2)o=d.slice(0,2)+'/'+d.slice(2);if(d.length>4)o=d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4);el.value=o;});}
+
+/* ---------- INICIALIZAÇÃO ---------- */
+window.addEventListener('DOMContentLoaded',init);
+async function init(){
+  if(SUPABASE_URL.indexOf('__')===0||SUPABASE_ANON.indexOf('__')===0){
+    $('cfgWarn').classList.remove('hide');
+    $('aBtn').disabled=true;
+    return;
   }
-  tb.innerHTML=h;
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+  const {data}=await sb.auth.getSession();
+  if(data.session){USER=data.session.user;abrirApp();}
+}
+function switchAuth(){
+  authMode=authMode==='login'?'signup':'login';
+  $('authTitle').textContent=authMode==='login'?'Entrar':'Criar conta';
+  $('aBtn').textContent=authMode==='login'?'Entrar':'Cadastrar';
+  $('aSwitch').textContent=authMode==='login'?'Não tem conta? Cadastre-se':'Já tenho conta — entrar';
+  $('authMsg').innerHTML='';
+}
+function authErr(t,ok){$('authMsg').innerHTML='<div class="msg '+(ok?'ok':'err')+'">'+esc(t)+'</div>';}
+async function doAuth(){
+  const email=$('aEmail').value.trim(),pass=$('aPass').value;
+  if(!email||!pass){authErr('Preencha e-mail e senha.');return;}
+  $('aBtn').disabled=true;
+  try{
+    if(authMode==='signup'){
+      const {error}=await sb.auth.signUp({email,password:pass});
+      if(error)throw error;
+      const {data,error:e2}=await sb.auth.signInWithPassword({email,password:pass});
+      if(e2){authErr('Conta criada! Confirme o e-mail se necessário e faça login.',true);$('aBtn').disabled=false;return;}
+      USER=data.user;abrirApp();
+    }else{
+      const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      USER=data.user;abrirApp();
+    }
+  }catch(e){authErr(traduzErro(e.message));$('aBtn').disabled=false;}
+}
+function traduzErro(m){
+  if(/Invalid login/i.test(m))return'E-mail ou senha incorretos.';
+  if(/already registered/i.test(m))return'Este e-mail já tem conta. Faça login.';
+  if(/at least 6/i.test(m))return'A senha precisa ter ao menos 6 caracteres.';
+  return m;
+}
+async function sair(){await sb.auth.signOut();location.reload();}
+
+async function abrirApp(){
+  $('auth').classList.add('hide');
+  $('app').classList.remove('hide');
+  $('who').textContent=USER.email;
+  await carregarTudo();
+}
+async function carregarTudo(){
+  const [a,f,t,s]=await Promise.all([
+    sb.from('kz_albuns').select('*').order('created_at'),
+    sb.from('kz_figurinhas').select('*').order('created_at'),
+    sb.from('kz_transacoes').select('*').order('data',{ascending:false}),
+    sb.from('kz_sets').select('*').order('created_at')
+  ]);
+  ST.albuns=a.data||[];ST.figurinhas=f.data||[];ST.transacoes=t.data||[];ST.sets=s.data||[];
+  renderTudo();
+}
+function renderTudo(){renderDash();renderCat();renderKol();renderTr();}
+
+/* ---------- NAVEGAÇÃO ---------- */
+function go(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  $('pg-'+pg).classList.add('on');
+  document.querySelectorAll('#topbar nav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===pg));
 }
 
-function toggleObs(id){obsOpenId=obsOpenId===id?null:id;renderKBody();}
-function excluir(id){if(confirm("Excluir este item?")){for(var i=0;i<itens.length;i++)if(itens[i].id===id){itens.splice(i,1);break;}saveData();renderAba();}}
-
-function renderTrans(){
-  var tC=0,tV=0,tT=0;
-  for(var i=0;i<trans.length;i++){if(trans[i].tipo==="Compra")tC+=trans[i].total;else if(trans[i].tipo==="Venda")tV+=trans[i].total;else tT++;}
-  var sl=tV-tC;
-  var h='<div class="row-flex"><div style="font-size:15px;font-weight:700;color:#002868;">Transacoes</div>';
-  h+='<button class="btn btn-green" onclick="openGG()">+ Gasto geral</button></div>';
-  h+='<div class="grid-metrics">';
-  h+='<div class="metric" style="border-color:#991b1b;background:#fee2e2;"><div class="ml">Saidas</div><div class="mv" style="color:#991b1b;">R$'+tC.toFixed(2)+'</div></div>';
-  h+='<div class="metric" style="border-color:#166534;background:#dcfce7;"><div class="ml">Entradas</div><div class="mv" style="color:#166534;">R$'+tV.toFixed(2)+'</div></div>';
-  h+='<div class="metric" style="border-color:#5b21b6;background:#ede9fe;"><div class="ml">Trocas</div><div class="mv" style="color:#5b21b6;">'+tT+'</div></div>';
-  var sc=sl>=0?"#166534":"#991b1b",sb=sl>=0?"#dcfce7":"#fee2e2";
-  h+='<div class="metric" style="border-color:'+sc+';background:'+sb+';"><div class="ml">Saldo</div><div class="mv" style="color:'+sc+';">R$'+sl.toFixed(2)+'</div></div></div>';
-  h+='<div class="card" style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Tipo</th><th>Copa</th><th>Descricao</th><th>Qtd</th><th>Unit.</th><th>Total</th><th>Contraparte</th></tr></thead><tbody>';
-  if(!trans.length)h+='<tr><td colspan="8" style="color:#9ca3af;font-size:12px;padding:12px;">Nenhuma transacao ainda.</td></tr>';
-  for(var i=trans.length-1;i>=0;i--){
-    var t=trans[i];
-    var iv=t.tipo==="Venda",ic=t.tipo==="Compra";
-    var cl=iv?"#166534":ic?"#991b1b":"#5b21b6";
-    var dt=iv?"#86efac":ic?"#fca5a5":"#c4b5fd";
-    h+='<tr><td>'+toD(t.data)+'</td>';
-    h+='<td><span style="font-weight:700;color:'+cl+';display:inline-flex;align-items:center;gap:4px;"><span style="width:7px;height:7px;border-radius:50%;background:'+dt+';display:inline-block;"></span>'+t.tipo+'</span></td>';
-    h+='<td>'+(t.copa||"--")+'</td><td>'+t.desc+'</td><td>'+t.quantidade+'</td>';
-    h+='<td style="color:'+cl+';font-weight:600;">'+fmt(t.valorUnit)+'</td>';
-    h+='<td style="color:'+cl+';font-weight:700;">'+fmt(t.total)+'</td>';
-    h+='<td>'+(t.contra||"--")+'</td></tr>';
-  }
-  h+='</tbody></table></div>';
-  document.getElementById("tab-transacoes").innerHTML=h;
+/* ---------- CATÁLOGO ---------- */
+function preencheSecoes(){
+  const sel=$('catSec');sel.innerHTML='';
+  TEAMS.forEach(t=>sel.insertAdjacentHTML('beforeend','<option value="'+t.c+'">Grupo '+t.g+' — '+t.n+'</option>'));
+  sel.insertAdjacentHTML('beforeend','<option value="FWC">Especiais FWC</option>');
 }
-
 function renderCat(){
-  var copa=document.getElementById("cat-sel")?document.getElementById("cat-sel").value:"2026";
-  var h='<div style="font-weight:700;font-size:15px;color:#002868;margin-bottom:10px;">Catalogo de Figurinhas</div>';
-  h+='<div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">';
-  h+='<select id="cat-sel" onchange="renderCat()" style="width:auto;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">';
-  for(var i=0;i<COPAS.length;i++)h+='<option value="'+COPAS[i].a+'"'+(COPAS[i].a===copa?" selected":"")+'>'+COPAS[i].a+' - '+COPAS[i].p+'</option>';
-  h+='</select><span style="font-size:11px;color:#6b7280;">Clique para editar numero/descricao</span></div>';
-  h+='<div class="card"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:5px;">';
-  var base=getFigs(copa);
-  var figs=[];
-  for(var i=0;i<base.length;i++)figs.push(catFigsStore[copa]&&catFigsStore[copa][i]?catFigsStore[copa][i]:base[i]);
-  for(var i=0;i<figs.length;i++){
-    var f=figs[i];
-    var tem=false;for(var j=0;j<itens.length;j++)if(itens[j].copa===copa&&itens[j].numFig===f.n){tem=true;break;}
-    h+='<div onclick="editCatFig(\''+copa+'\','+i+')" style="padding:6px 8px;border-radius:6px;border:1px solid '+(tem?"#166534":"#e5e7eb")+';background:'+(tem?"#dcfce7":"#f9fafb")+';font-size:11px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">';
-    h+='<span><strong style="color:#002868;margin-right:3px;">#'+f.n+'</strong><span style="color:#6b7280;">'+f.d+'</span></span>';
-    if(tem)h+='<span style="color:#166534;font-weight:700;">ok</span>';
-    h+='</div>';
+  if(!$('catSec').options.length)preencheSecoes();
+  const ed=$('catEd').value,sec=$('catSec').value;
+  const lista=cromosSecao(ed,sec);
+  let h='<p class="note" style="margin-bottom:8px">'+lista.length+' cromos · edição '+(ed==='670'?'Tradicional 670':'Internacional 638')+'</p><div class="catfig">';
+  lista.forEach(c=>h+='<span><b>'+esc(c.num)+'</b> · '+esc(c.desc)+'</span>');
+  h+='</div>';
+  $('catBody').innerHTML=h;
+}
+
+/* ---------- CÁLCULOS FINANCEIROS ---------- */
+/* média de custo das figurinhas de um álbum de referência (status na coleção) */
+function mediaAlbum(copa,catAlb){
+  const fs=ST.figurinhas.filter(f=>f.copa===copa&&f.catalogo_album===catAlb&&(f.status==='colecao'||f.status==='repetida'));
+  let qt=0,tot=0;
+  fs.forEach(f=>{qt+=f.quantidade;tot+=f.quantidade*Number(f.custo_unit||0);});
+  return qt?tot/qt:0;
+}
+function totais(){
+  let saida=0,entrada=0;
+  ST.transacoes.forEach(t=>{
+    if(t.tipo==='venda')entrada+=Number(t.valor||0);
+    else saida+=Number(t.valor||0);
+  });
+  return {saida,entrada,saldo:entrada-saida};
+}
+
+/* ---------- PAINEL ---------- */
+function renderDash(){
+  const t=totais();
+  const nFig=ST.figurinhas.reduce((s,f)=>s+f.quantidade,0);
+  $('kpis').innerHTML=[
+    ['Álbuns',ST.albuns.length],
+    ['Figurinhas',nFig],
+    ['Sets completos',ST.sets.length],
+    ['Total gasto',money(t.saida),'neg'],
+    ['Total recebido',money(t.entrada),'pos'],
+    ['Saldo',money(t.saldo),t.saldo<0?'neg':'pos']
+  ].map(k=>'<div class="kpi"><div class="v '+(k[2]||'')+'">'+k[1]+'</div><div class="l">'+k[0]+'</div></div>').join('');
+  // progresso por álbum de referência
+  const refs={};
+  ST.figurinhas.forEach(f=>{const k=f.copa+'|'+f.catalogo_album+'|'+f.edicao;(refs[k]=refs[k]||new Set());if(f.status==='colecao'||f.status==='repetida')refs[k].add(f.numero);});
+  let h='';
+  Object.keys(refs).forEach(k=>{
+    const[copa,cat,ed]=k.split('|');
+    const total=cromosEdicao(ed).length;
+    const tem=refs[k].size;
+    const pct=total?Math.round(tem/total*100):0;
+    const alb=ALBUNS.find(a=>a.code===cat);
+    h+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(alb?alb.nome:cat)+' · Copa '+copa+'</span><span>'+tem+'/'+total+' ('+pct+'%)</span></div>'
+      +'<div style="background:#eef0f4;border-radius:6px;height:9px;margin-top:3px"><div style="background:var(--gold);height:9px;border-radius:6px;width:'+pct+'%"></div></div></div>';
+  });
+  $('progresso').innerHTML=h||'<div class="empty">Cadastre figurinhas para ver o progresso.</div>';
+}
+
+/* ---------- KOLEÇÃO ---------- */
+function nomeAlbumCat(code){const a=ALBUNS.find(x=>x.code===code);return a?a.nome:code;}
+function renderKol(){
+  // álbuns
+  if(!ST.albuns.length)$('listaAlbuns').innerHTML='<div class="empty">Nenhum álbum cadastrado.</div>';
+  else{
+    let h='<table><tr><th>Álbum</th><th>Copa</th><th>Estado</th><th>Capa/Cor</th><th>Status</th><th>Valor</th><th></th></tr>';
+    ST.albuns.forEach(a=>{
+      const vendido=a.status==='vendido';
+      const valor=vendido?money(a.valor_venda):money(a.custo);
+      h+='<tr><td>'+esc(a.nome||nomeAlbumCat(a.catalogo_album))+'</td><td>'+esc(a.copa)+'</td><td>'+esc(a.estado||'-')+'</td>'
+        +'<td>'+esc(a.capa||'-')+' '+esc(a.cor||'')+'</td><td><span class="tag '+a.status+'">'+a.status+'</span></td>'
+        +'<td class="val '+(vendido?'pos':'neg')+'">'+valor+'</td>'
+        +'<td>'+(vendido?'':'<button class="btn green sm" onclick="venderItem(\'album\',\''+a.id+'\')">Vender</button> ')
+        +'<button class="btn red sm" onclick="excluir(\'kz_albuns\',\''+a.id+'\')">×</button></td></tr>';
+    });
+    $('listaAlbuns').innerHTML=h+'</table>';
   }
-  h+='</div></div>';
-  document.getElementById("tab-catalogo").innerHTML=h;
-}
-
-function editCatFig(copa,fi){
-  var base=getFigs(copa);
-  var cur=catFigsStore[copa]&&catFigsStore[copa][fi]?catFigsStore[copa][fi]:base[fi];
-  var nn=prompt("Numero da figurinha:",cur.n);if(nn===null)return;
-  var nd=prompt("Descricao:",cur.d);if(nd===null)return;
-  if(!catFigsStore[copa]){catFigsStore[copa]=[];for(var i=0;i<base.length;i++)catFigsStore[copa].push({n:base[i].n,d:base[i].d});}
-  catFigsStore[copa][fi]={n:nn.trim(),d:nd.trim()};
-  lss("kc_cf_"+sess.email,catFigsStore);
-  renderCat();
-}
-
-function openItem(id){
-  editId=id;figQtds={};gradeOpen=false;valMode="total";
-  var item=null;if(id)for(var i=0;i<itens.length;i++)if(itens[i].id===id){item=itens[i];break;}
-  document.getElementById("m-item-title").textContent=id?"Editar item":"Adicionar a Kolecao";
-  document.getElementById("f-copa").value=item?item.copa:"";
-  document.getElementById("f-data").value=item?toD(item.data):hj();
-  document.getElementById("f-tipo").value=item?item.tipo:"Figurinha";
-  document.getElementById("f-desc").value=item?item.desc:"";
-  document.getElementById("f-status").value=item?item.status:"Colecao";
-  document.getElementById("f-qtd").value=item?item.quantidade:1;
-  document.getElementById("f-val").value=item?item.valorUnit:"";
-  document.getElementById("f-obs").value=item?item.obs:"";
-  document.getElementById("f-gerar").checked=true;
-  document.getElementById("f-aest").value=item&&item.aEst?item.aEst:"Vazio";
-  document.getElementById("f-acap").value=item&&item.aCap?item.aCap:"Mole";
-  document.getElementById("f-acor").value=item?item.aCor||"":"";
-  document.getElementById("f-acort").checked=item?item.aCort||false:false;
-  document.getElementById("f-apais").value=item?item.aPais||"":"";
-  document.getElementById("f-areg").value=item?item.aReg||"":"";
-  if(item&&item.numFig)figQtds[item.numFig]=item.quantidade;
-  setValMode("total");onTipoChange();updateValHint();updateSelDisplay();
-  document.getElementById("f-grade").style.display="none";
-  document.getElementById("f-sugs").style.display="none";
-  openModal("m-item");
-}
-
-function onTipoChange(){
-  var t=document.getElementById("f-tipo").value;
-  document.getElementById("album-fields").style.display=t==="Album"?"block":"none";
-  document.getElementById("fig-fields").style.display=t==="Figurinha"?"block":"none";
-  updateAlbumTags();
-}
-function onCopaChange(){figQtds={};updateSelDisplay();if(gradeOpen)renderGrade();}
-function updateAlbumTags(){
-  var tags=[document.getElementById("f-aest").value,document.getElementById("f-acap").value,document.getElementById("f-acor").value,document.getElementById("f-acort").checked?"Cortesia":null,document.getElementById("f-areg").value,document.getElementById("f-apais").value];
-  var h="";for(var i=0;i<tags.length;i++)if(tags[i])h+='<span class="pill">'+tags[i]+'</span>';
-  document.getElementById("album-tags").innerHTML=h;
-}
-function buscarFigs(txt){
-  var copa=document.getElementById("f-copa").value;
-  var box=document.getElementById("f-sugs");
-  if(!copa||txt.length<1){box.style.display="none";return;}
-  var figs=getFigs(copa);
-  var res=[];
-  for(var i=0;i<figs.length;i++)if((figs[i].n+" "+figs[i].d).toLowerCase().indexOf(txt.toLowerCase())>=0)res.push(figs[i]);
-  res=res.slice(0,8);
-  if(!res.length){box.style.display="none";return;}
-  var h="";for(var i=0;i<res.length;i++)h+='<div class="sug-item" onclick="addFig(\''+res[i].n+'\')"><strong style="color:#002868;">#'+res[i].n+'</strong> '+res[i].d+'</div>';
-  box.innerHTML=h;box.style.display="block";
-}
-function addFig(n){figQtds[n]=(figQtds[n]||0)+1;document.getElementById("f-figbusca").value="";document.getElementById("f-sugs").style.display="none";updateSelDisplay();if(gradeOpen)renderGrade();}
-function incFig(n){figQtds[n]=(figQtds[n]||0)+1;updateSelDisplay();renderGrade();}
-function decFig(n){var q=(figQtds[n]||1)-1;if(q<=0)delete figQtds[n];else figQtds[n]=q;updateSelDisplay();renderGrade();}
-function toggleGrade(){gradeOpen=!gradeOpen;document.getElementById("f-grade").style.display=gradeOpen?"grid":"none";if(gradeOpen)renderGrade();}
-function renderGrade(){
-  var copa=document.getElementById("f-copa").value;if(!copa)return;
-  var figs=getFigs(copa);var g=document.getElementById("f-grade");var h="";
-  for(var i=0;i<figs.length;i++){
-    var f=figs[i];var q=figQtds[f.n]||0;
-    var tem=false;for(var j=0;j<itens.length;j++)if(itens[j].copa===copa&&itens[j].numFig===f.n&&(!editId||itens[j].id!==editId)){tem=true;break;}
-    var cls=q>0?"fig-cell sel":tem?"fig-cell tem":"fig-cell";
-    h+='<div class="'+cls+'"><div class="fig-top"><span class="fn" onclick="incFig(\''+f.n+'\')">#'+f.n+'</span>';
-    if(q>0)h+='<div class="ctrls"><button onclick="decFig(\''+f.n+'\')">-</button><span class="qn">'+q+'</span><button onclick="incFig(\''+f.n+'\')">+</button></div>';
-    h+='</div><div class="fd" onclick="incFig(\''+f.n+'\')">'+f.d+'</div>';
-    if(tem)h+='<div style="color:#166534;font-size:8px;">ok na kolecao</div>';
-    h+='</div>';
+  // figurinhas
+  if(!ST.figurinhas.length)$('listaFig').innerHTML='<div class="empty">Nenhuma figurinha cadastrada.</div>';
+  else{
+    let h='<table><tr><th>Nº</th><th>Álbum ref.</th><th>Edição</th><th>Qtd</th><th>Custo unit.</th><th>Status</th><th></th></tr>';
+    ST.figurinhas.forEach(f=>{
+      const vendida=f.status==='vendida';
+      h+='<tr><td><b>'+esc(f.numero)+'</b></td><td>'+esc(nomeAlbumCat(f.catalogo_album))+'</td><td>'+esc(f.edicao)+'</td>'
+        +'<td>'+f.quantidade+'</td><td class="val '+(vendida?'pos':'neg')+'">'+money(f.custo_unit)+'</td>'
+        +'<td><span class="tag '+f.status+'">'+f.status+'</span></td>'
+        +'<td><button class="btn red sm" onclick="excluir(\'kz_figurinhas\',\''+f.id+'\')">×</button></td></tr>';
+    });
+    $('listaFig').innerHTML=h+'</table>';
   }
-  g.innerHTML=h;
-}
-function updateSelDisplay(){
-  var sels=Object.keys(figQtds);var el=document.getElementById("f-sels");if(!el)return;
-  if(!sels.length){el.style.display="none";document.getElementById("f-qtd").value=1;updateValHint();return;}
-  var tot=0;for(var i=0;i<sels.length;i++)tot+=(figQtds[sels[i]]||1);
-  el.style.display="block";
-  var txt="Selecionadas: ";for(var i=0;i<sels.length;i++)txt+=sels[i]+"x"+(figQtds[sels[i]])+(i<sels.length-1?", ":"");
-  el.innerHTML=txt+' <button class="btn-sm" onclick="figQtds={};updateSelDisplay();if(gradeOpen)renderGrade();">Limpar</button>';
-  document.getElementById("f-qtd").value=tot;
-  updateValHint();
-}
-function setValMode(m){
-  valMode=m;
-  document.getElementById("vm-total").style.cssText=m==="total"?"background:#002868;color:#fff;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  document.getElementById("vm-unit").style.cssText=m==="unit"?"background:#002868;color:#fff;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  updateValHint();
-}
-function updateValHint(){
-  var v=Number(document.getElementById("f-val")?document.getElementById("f-val").value:0)||0;
-  var qt=Number(document.getElementById("f-qtd")?document.getElementById("f-qtd").value:1)||1;
-  var el=document.getElementById("val-hint");if(!el)return;
-  if(!v||qt<=1){el.textContent="";return;}
-  el.textContent=valMode==="total"?"= R$"+(v/qt).toFixed(2)+" por item ("+qt+" itens)":"= R$"+(v*qt).toFixed(2)+" total ("+qt+" itens)";
-}
-
-function salvarItem(){
-  var copa=document.getElementById("f-copa").value;
-  if(!copa){alert("Selecione a copa.");return;}
-  var tipo=document.getElementById("f-tipo").value;
-  var sels=Object.keys(figQtds);
-  var figs=sels.length>0?sels:[""];
-  var vn=Number(document.getElementById("f-val").value)||0;
-  var qt=Number(document.getElementById("f-qtd").value)||1;
-  var qtot=0;if(sels.length>0)for(var i=0;i<sels.length;i++)qtot+=(figQtds[sels[i]]||1);else qtot=qt;
-  var gerar=document.getElementById("f-gerar").checked;
-  for(var fi=0;fi<figs.length;fi++){
-    var nFig=figs[fi];
-    var qf=figQtds[nFig]||qt;
-    var vu=valMode==="unit"?vn:(figs.length>1?vn/qtot*qf:vn);
-    var totalT=valMode==="unit"?vn*qf:(figs.length>1?vn/figs.length:vn);
-    var allF=getFigs(copa);var fig=null;for(var j=0;j<allF.length;j++)if(allF[j].n===nFig){fig=allF[j];break;}
-    var dc=document.getElementById("f-desc").value||(fig?fig.d:"");
-    var item={id:editId&&figs.length===1?editId:gid(),copa:copa,tipo:tipo,numFig:nFig,desc:dc,
-      status:document.getElementById("f-status").value,quantidade:qf,valorUnit:vu,
-      obs:document.getElementById("f-obs").value,data:toS(document.getElementById("f-data").value),
-      aEst:document.getElementById("f-aest").value,aCap:document.getElementById("f-acap").value,
-      aCor:document.getElementById("f-acor").value,aCort:document.getElementById("f-acort").checked,
-      aPais:document.getElementById("f-apais").value,aReg:document.getElementById("f-areg").value};
-    if(editId&&figs.length===1){for(var j=0;j<itens.length;j++)if(itens[j].id===editId){itens[j]=item;break;}}
-    else itens.push(item);
-    if(!editId&&gerar&&vn>0)trans.push({id:gid(),tipo:"Compra",copa:copa,desc:tipo+(nFig?" #"+nFig:"")+(dc?" - "+dc:""),quantidade:qf,valorUnit:valMode==="unit"?vn:totalT/qf,total:totalT,data:toS(document.getElementById("f-data").value),contra:""});
+  // sets
+  if(!ST.sets.length)$('listaSets').innerHTML='<div class="empty">Nenhum set completo gerado.</div>';
+  else{
+    let h='<table><tr><th>Copa</th><th>Álbum ref.</th><th>Edição</th><th>Custo</th><th>Status</th><th></th></tr>';
+    ST.sets.forEach(s=>{
+      const vendido=s.status==='vendido';
+      h+='<tr><td>'+esc(s.copa)+'</td><td>'+esc(nomeAlbumCat(s.catalogo_album))+'</td><td>'+esc(s.edicao)+'</td>'
+        +'<td class="val '+(vendido?'pos':'neg')+'">'+(vendido?money(s.valor_venda):money(s.custo))+'</td>'
+        +'<td><span class="tag '+(vendido?'vendido':'colecao')+'">'+(vendido?'vendido':'colecao')+'</span></td>'
+        +'<td>'+(vendido?'':'<button class="btn green sm" onclick="venderItem(\'set\',\''+s.id+'\')">Vender</button> ')
+        +'<button class="btn red sm" onclick="excluir(\'kz_sets\',\''+s.id+'\')">×</button></td></tr>';
+    });
+    $('listaSets').innerHTML=h+'</table>';
   }
-  saveData();closeModal("m-item");renderAba();
 }
 
-function openVU(id){vendaId=id;document.getElementById("vv").value="";document.getElementById("vc").value="";document.getElementById("vd").value=hj();openModal("m-vu");}
-function salvarVendaUnit(){
-  var item=null;for(var i=0;i<itens.length;i++)if(itens[i].id===vendaId){item=itens[i];break;}if(!item)return;
-  var tot=Number(document.getElementById("vv").value)||0;
-  trans.push({id:gid(),tipo:"Venda",copa:item.copa,desc:item.tipo+(item.numFig?" #"+item.numFig:"")+(item.desc?" - "+item.desc:""),quantidade:item.quantidade,valorUnit:tot,total:tot,data:toS(document.getElementById("vd").value),contra:document.getElementById("vc").value});
-  for(var i=0;i<itens.length;i++)if(itens[i].id===vendaId){itens[i].status="Vendido";break;}
-  saveData();closeModal("m-vu");renderAba();
+/* ---------- TRANSAÇÕES ---------- */
+function renderTr(){
+  if(!ST.transacoes.length){$('listaTr').innerHTML='<div class="empty">Nenhuma transação.</div>';return;}
+  let h='<table><tr><th>Data</th><th>Tipo</th><th>Copa</th><th>Descrição</th><th>Valor</th><th></th></tr>';
+  ST.transacoes.forEach(t=>{
+    const pos=t.tipo==='venda';
+    h+='<tr><td>'+isoParaBr(t.data)+'</td><td><span class="tag">'+t.tipo+'</span></td><td>'+esc(t.copa||'-')+'</td>'
+      +'<td>'+esc(t.descricao||'')+'</td><td class="val '+(pos?'pos':'neg')+'">'+(pos?'+':'−')+' '+money(t.valor)+'</td>'
+      +'<td><button class="btn red sm" onclick="excluir(\'kz_transacoes\',\''+t.id+'\')">×</button></td></tr>';
+  });
+  $('listaTr').innerHTML=h+'</table>';
 }
 
-function openLV(){
-  loteIds=[];lvMode="total";
-  var avail=[];for(var i=0;i<itens.length;i++)if(itens[i].status==="Colecao"||itens[i].status==="Venda/Troca")avail.push(itens[i]);
-  var h="";
-  if(!avail.length)h='<div style="padding:14px;color:#9ca3af;font-size:12px;text-align:center;">Nenhum item disponivel.</div>';
-  else for(var i=0;i<avail.length;i++){var it=avail[i];h+='<div class="lote-row" id="lv-row-'+it.id+'"><input type="checkbox" onchange="togLV(\''+it.id+'\')"/><span style="flex:1;"><strong style="color:#002868;">'+it.copa+'</strong> - '+it.tipo+(it.numFig?" #"+it.numFig:"")+'</span><span style="font-size:11px;color:#991b1b;">'+(it.valorUnit>0?"R$"+it.valorUnit.toFixed(2):"")+'</span><input type="number" class="lote-ind" id="lvi-'+it.id+'" min="0" step="0.01" placeholder="R$" onclick="event.stopPropagation()"/></div>';}
-  document.getElementById("lv-list").innerHTML=h;
-  document.getElementById("lv-val").value="";document.getElementById("lv-comp").value="";document.getElementById("lv-data").value=hj();
-  document.getElementById("lv-count").textContent="";document.getElementById("lv-hint").textContent="";
-  document.getElementById("lv-btn").textContent="Confirmar venda (0)";
-  setLVM("total");openModal("m-lv");
+/* ---------- MODAL GENÉRICO ---------- */
+function modal(html){$('ovBox').innerHTML=html;$('ov').classList.remove('hide');document.querySelectorAll('#ov input[data-data]').forEach(maskData);}
+function fecharModal(){$('ov').classList.add('hide');}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov')fecharModal();});
+
+/* ---------- ADICIONAR ÁLBUM ---------- */
+function modalAlbum(){
+  let opt=ALBUNS.map(a=>'<option value="'+a.code+'">'+esc(a.nome)+' ('+a.ed+')</option>').join('');
+  modal('<h3>Adicionar álbum</h3>'
+   +'<div class="fld"><label>Copa</label><input id="mCopa" value="2022"></div>'
+   +'<div class="fld"><label>Álbum (catálogo)</label><select id="mCat">'+opt+'</select></div>'
+   +'<div class="row2">'
+   +'<div class="fld"><label>Estado</label><select id="mEstado"><option value="vazio">Vazio</option><option value="incompleto">Incompleto</option><option value="completo">Completo</option></select></div>'
+   +'<div class="fld"><label>Capa</label><select id="mCapa"><option value="mole">Mole</option><option value="dura">Dura</option></select></div>'
+   +'<div class="fld"><label>Cor</label><input id="mCor" placeholder="bordô, prata, ouro..."></div>'
+   +'<div class="fld"><label>País de impressão</label><input id="mPais" placeholder="deixe em branco se não souber"></div>'
+   +'<div class="fld"><label>País/região do álbum</label><input id="mReg"></div>'
+   +'<div class="fld"><label>Cortesia do editor?</label><select id="mCort"><option value="nao">Não</option><option value="sim">Sim</option></select></div>'
+   +'<div class="fld"><label>Numerado?</label><select id="mNum" onchange="document.getElementById(\'mNumSerie\').disabled=this.value!==\'sim\'"><option value="nao">Não</option><option value="sim">Sim</option></select></div>'
+   +'<div class="fld"><label>Nº de série</label><input id="mNumSerie" disabled></div>'
+   +'<div class="fld"><label>Modo</label><select id="mModo"><option value="montar">Montar o álbum (colar)</option><option value="avulsas">Manter figurinhas avulsas</option></select></div>'
+   +'<div class="fld"><label>Custo (R$)</label><input id="mCusto" type="number" step="0.01" value="0"></div>'
+   +'<div class="fld"><label>Data de aquisição</label><input id="mData" data-data placeholder="dd/mm/aa" value="'+isoParaBr(hojeISO())+'"></div>'
+   +'</div>'
+   +'<p class="note">Se o custo for maior que zero, uma transação de compra é criada automaticamente.</p>'
+   +'<div class="bar" style="margin-top:14px"><button class="btn gold" onclick="salvarAlbum()">Salvar</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
 }
-function togLV(id){
-  var idx=loteIds.indexOf(id);if(idx>=0)loteIds.splice(idx,1);else loteIds.push(id);
-  var row=document.getElementById("lv-row-"+id);if(row){if(loteIds.indexOf(id)>=0)row.classList.add("lsel");else row.classList.remove("lsel");}
-  var ind=document.getElementById("lvi-"+id);if(ind)ind.style.display=lvMode==="individual"&&loteIds.indexOf(id)>=0?"inline-block":"none";
-  document.getElementById("lv-count").textContent=loteIds.length?loteIds.length+" selecionado(s)":"";
-  document.getElementById("lv-btn").textContent="Confirmar venda ("+loteIds.length+")";
-  updateLVHint();
+async function salvarAlbum(){
+  const cat=$('mCat').value;
+  const albCat=ALBUNS.find(a=>a.code===cat);
+  const custo=Number($('mCusto').value||0);
+  const data=brParaIso($('mData').value)||hojeISO();
+  const copa=$('mCopa').value.trim()||'2022';
+  const reg={copa,catalogo_album:cat,edicao:albCat.ed,nome:albCat.nome,
+    estado:$('mEstado').value,capa:$('mCapa').value,cor:$('mCor').value.trim(),
+    cortesia:$('mCort').value==='sim',pais_impressao:$('mPais').value.trim(),
+    regiao:$('mReg').value.trim(),numerado:$('mNum').value==='sim',
+    numero_serie:$('mNumSerie').value.trim(),modo:$('mModo').value,
+    custo,data_aquisicao:data,status:'colecao'};
+  const {error}=await sb.from('kz_albuns').insert([reg]);
+  if(error){alert('Erro: '+error.message);return;}
+  if(custo>0)await sb.from('kz_transacoes').insert([{tipo:'compra',data,copa,descricao:'Compra de álbum: '+albCat.nome,valor:custo}]);
+  fecharModal();await carregarTudo();
 }
-function setLVM(m){
-  lvMode=m;
-  document.getElementById("lvm-t").style.cssText=m==="total"?"background:#002868;color:#fff;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  document.getElementById("lvm-i").style.cssText=m==="individual"?"background:#002868;color:#fff;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  document.getElementById("lv-tf").style.display=m==="total"?"block":"none";
-  document.getElementById("lv-im").style.display=m==="individual"?"block":"none";
-  for(var i=0;i<itens.length;i++){var el=document.getElementById("lvi-"+itens[i].id);if(el)el.style.display=m==="individual"&&loteIds.indexOf(itens[i].id)>=0?"inline-block":"none";}
+
+/* ---------- ADICIONAR FIGURINHAS ---------- */
+let figSel={}; // numero -> qtd
+function modalFig(){
+  figSel={};
+  let opt=ALBUNS.map(a=>'<option value="'+a.code+'">'+esc(a.nome)+' ('+a.ed+')</option>').join('');
+  modal('<h3>Adicionar figurinhas</h3>'
+   +'<div class="row2">'
+   +'<div class="fld"><label>Copa</label><input id="fCopa" value="2022"></div>'
+   +'<div class="fld"><label>Álbum de referência</label><select id="fCat" onchange="figEdAtualiza()">'+opt+'</select></div>'
+   +'</div>'
+   +'<div class="fld"><label>Seção (grade)</label><select id="fSec" onchange="figGrade()"></select></div>'
+   +'<div class="grade" id="fGrade"></div>'
+   +'<div class="fld" style="margin-top:8px"><label>Ou inserir por numeração (ex: BRA1-BRA20; FWC1-FWC6)</label><input id="fLote" placeholder="separe por ; — funciona junto com a grade"></div>'
+   +'<div class="row2">'
+   +'<div class="fld"><label>Como informar o custo</label><select id="fModoCusto"><option value="total">Valor total do lote</option><option value="unit">Valor por figurinha</option></select></div>'
+   +'<div class="fld"><label>Valor (R$)</label><input id="fValor" type="number" step="0.01" value="0"></div>'
+   +'<div class="fld"><label>Status</label><select id="fStatus"><option value="colecao">Coleção</option><option value="repetida">Repetida</option><option value="venda">Para venda</option><option value="troca">Para troca</option></select></div>'
+   +'<div class="fld"><label>Data</label><input id="fData" data-data placeholder="dd/mm/aa" value="'+isoParaBr(hojeISO())+'"></div>'
+   +'</div>'
+   +'<p class="note" id="fResumo">Nenhuma figurinha selecionada.</p>'
+   +'<div class="bar" style="margin-top:10px"><button class="btn gold" onclick="salvarFig()">Salvar</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
+  figEdAtualiza();
 }
-function updateLVHint(){var n=loteIds.length;var v=Number(document.getElementById("lv-val").value)||0;document.getElementById("lv-hint").textContent=n>0&&v>0?"= R$"+(v/n).toFixed(2)+" por item":"";}
-function salvarLote(){
-  var n=loteIds.length;if(!n)return;
-  for(var i=0;i<loteIds.length;i++){
-    var id=loteIds[i];var item=null;for(var j=0;j<itens.length;j++)if(itens[j].id===id){item=itens[j];break;}if(!item)continue;
-    var tot=lvMode==="total"?(Number(document.getElementById("lv-val").value)||0)/n:Number(document.getElementById("lvi-"+id)?document.getElementById("lvi-"+id).value:0)||0;
-    for(var j=0;j<itens.length;j++)if(itens[j].id===id){itens[j].status="Vendido";break;}
-    trans.push({id:gid(),tipo:"Venda",copa:item.copa,desc:item.tipo+(item.numFig?" #"+item.numFig:"")+(item.desc?" - "+item.desc:""),quantidade:item.quantidade,valorUnit:tot,total:tot,data:toS(document.getElementById("lv-data").value),contra:document.getElementById("lv-comp").value});
+function figEdAtualiza(){
+  const cat=$('fCat').value,alb=ALBUNS.find(a=>a.code===cat);
+  const sec=$('fSec');sec.innerHTML='';
+  TEAMS.forEach(t=>sec.insertAdjacentHTML('beforeend','<option value="'+t.c+'">'+t.n+'</option>'));
+  sec.insertAdjacentHTML('beforeend','<option value="FWC">Especiais FWC</option>');
+  figGrade();
+}
+function figGrade(){
+  const alb=ALBUNS.find(a=>a.code===$('fCat').value);
+  const lista=cromosSecao(alb.ed,$('fSec').value);
+  $('fGrade').innerHTML=lista.map(c=>{
+    const q=figSel[c.num]||0;
+    return '<div class="chip'+(q?' sel':'')+'" id="chip-'+c.num+'">'
+      +'<b onclick="figMais(\''+c.num+'\')" title="'+esc(c.desc)+'" style="cursor:pointer">'+esc(c.num)+'</b>'
+      +(q?'<button onclick="figMenos(\''+c.num+'\')">−</button><span class="qt">'+q+'</span><button onclick="figMais(\''+c.num+'\')">+</button>':'')
+      +'</div>';
+  }).join('');
+}
+function figMais(n){figSel[n]=(figSel[n]||0)+1;figGrade();figResumo();}
+function figMenos(n){figSel[n]=(figSel[n]||0)-1;if(figSel[n]<=0)delete figSel[n];figGrade();figResumo();}
+function parseLote(txt,ed){
+  const valid=new Set(cromosEdicao(ed).map(c=>c.num));
+  const res={};
+  txt.split(';').forEach(part=>{
+    part=part.trim();if(!part)return;
+    const m=part.match(/^([A-Za-z]*)(\d+)\s*-\s*([A-Za-z]*)(\d+)$/);
+    if(m){
+      const pre=m[1]||m[3];const a=+m[2],b=+m[4];
+      for(let i=Math.min(a,b);i<=Math.max(a,b);i++){const n=pre+i;if(valid.has(n))res[n]=(res[n]||0)+1;}
+    }else if(valid.has(part)){res[part]=(res[part]||0)+1;}
+  });
+  return res;
+}
+function figResumo(){
+  const alb=ALBUNS.find(a=>a.code===$('fCat').value);
+  const lote=parseLote($('fLote').value,alb.ed);
+  const merged={...figSel};
+  Object.keys(lote).forEach(n=>merged[n]=(merged[n]||0)+lote[n]);
+  const tot=Object.values(merged).reduce((a,b)=>a+b,0);
+  $('fResumo').textContent=tot?(tot+' figurinha(s): '+Object.keys(merged).map(n=>n+'×'+merged[n]).join(', ')):'Nenhuma figurinha selecionada.';
+  return merged;
+}
+async function salvarFig(){
+  const alb=ALBUNS.find(a=>a.code===$('fCat').value);
+  const merged=figResumo();
+  const nums=Object.keys(merged);
+  if(!nums.length){alert('Selecione ao menos uma figurinha (na grade ou por numeração).');return;}
+  const totQt=nums.reduce((s,n)=>s+merged[n],0);
+  const valor=Number($('fValor').value||0);
+  const custoUnit=$('fModoCusto').value==='unit'?valor:(totQt?valor/totQt:0);
+  const custoTotal=$('fModoCusto').value==='unit'?valor*totQt:valor;
+  const copa=$('fCopa').value.trim()||'2022';
+  const data=brParaIso($('fData').value)||hojeISO();
+  const status=$('fStatus').value;
+  const rows=nums.map(n=>({copa,catalogo_album:alb.code,edicao:alb.ed,numero:n,quantidade:merged[n],custo_unit:custoUnit,status}));
+  const {error}=await sb.from('kz_figurinhas').insert(rows);
+  if(error){alert('Erro: '+error.message);return;}
+  if(custoTotal>0)await sb.from('kz_transacoes').insert([{tipo:'compra',data,copa,descricao:'Compra de '+totQt+' figurinha(s) — '+alb.nome,valor:custoTotal}]);
+  fecharModal();await carregarTudo();
+}
+
+/* ---------- VENDER ITEM (álbum / set) ---------- */
+async function venderItem(tipo,id){
+  const v=prompt('Valor da venda (R$):','0');
+  if(v===null)return;
+  const valor=Number(v.replace(',','.'))||0;
+  const data=hojeISO();
+  if(tipo==='album'){
+    const a=ST.albuns.find(x=>x.id===id);
+    await sb.from('kz_albuns').update({status:'vendido',valor_venda:valor}).eq('id',id);
+    await sb.from('kz_transacoes').insert([{tipo:'venda',data,copa:a.copa,descricao:'Venda de álbum: '+(a.nome||a.catalogo_album),valor}]);
+  }else{
+    const s=ST.sets.find(x=>x.id===id);
+    await sb.from('kz_sets').update({status:'vendido',valor_venda:valor}).eq('id',id);
+    await sb.from('kz_transacoes').insert([{tipo:'venda',data,copa:s.copa,descricao:'Venda de Set Completo — '+nomeAlbumCat(s.catalogo_album),valor}]);
   }
-  saveData();closeModal("m-lv");renderAba();
+  await carregarTudo();
 }
 
-function openLC(){
-  loteIds=[];lcMode="total";
-  var h="";
-  if(!itens.length)h='<div style="padding:14px;color:#9ca3af;font-size:12px;text-align:center;">Nenhum item cadastrado.</div>';
-  else for(var i=0;i<itens.length;i++){var it=itens[i];h+='<div class="lote-row" id="lc-row-'+it.id+'"><input type="checkbox" onchange="togLC(\''+it.id+'\')"/><span style="flex:1;"><strong style="color:#002868;">'+it.copa+'</strong> - '+it.tipo+(it.numFig?" #"+it.numFig:"")+'</span><input type="number" class="lote-ind" id="lci-'+it.id+'" min="0" step="0.01" placeholder="R$" onclick="event.stopPropagation()"/></div>';}
-  document.getElementById("lc-list").innerHTML=h;
-  document.getElementById("lc-val").value="";document.getElementById("lc-comp").value="";document.getElementById("lc-data").value=hj();
-  document.getElementById("lc-count").textContent="";document.getElementById("lc-hint").textContent="";
-  document.getElementById("lc-btn").textContent="Confirmar compra (0)";
-  setLCM("total");openModal("m-lc");
+/* ---------- VENDA EM LOTE ---------- */
+function modalVendaLote(){
+  const disp=ST.figurinhas.filter(f=>f.status!=='vendida');
+  if(!disp.length){alert('Não há figurinhas disponíveis para venda.');return;}
+  let linhas=disp.map(f=>'<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:4px 0">'
+    +'<input type="checkbox" class="vlChk" value="'+f.id+'"> <b>'+esc(f.numero)+'</b> · '+esc(nomeAlbumCat(f.catalogo_album))
+    +' · qtd '+f.quantidade+' <input type="number" step="0.01" class="vlVal" data-id="'+f.id+'" placeholder="valor" style="width:90px;margin-left:auto"></label>').join('');
+  modal('<h3>Venda em lote</h3>'
+   +'<div class="fld"><label>Modo de valor</label><select id="vlModo"><option value="total">Valor total do lote</option><option value="item">Valor por item (campo ao lado)</option></select></div>'
+   +'<div class="fld"><label>Valor total (use no modo "total")</label><input id="vlTotal" type="number" step="0.01" value="0"></div>'
+   +'<div class="fld"><label>Data</label><input id="vlData" data-data placeholder="dd/mm/aa" value="'+isoParaBr(hojeISO())+'"></div>'
+   +'<div style="max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px">'+linhas+'</div>'
+   +'<div class="bar" style="margin-top:12px"><button class="btn green" onclick="salvarVendaLote()">Confirmar venda</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
 }
-function togLC(id){
-  var idx=loteIds.indexOf(id);if(idx>=0)loteIds.splice(idx,1);else loteIds.push(id);
-  var row=document.getElementById("lc-row-"+id);if(row){if(loteIds.indexOf(id)>=0)row.classList.add("lselg");else row.classList.remove("lselg");}
-  var ind=document.getElementById("lci-"+id);if(ind)ind.style.display=lcMode==="individual"&&loteIds.indexOf(id)>=0?"inline-block":"none";
-  document.getElementById("lc-count").textContent=loteIds.length?loteIds.length+" selecionado(s)":"";
-  document.getElementById("lc-btn").textContent="Confirmar compra ("+loteIds.length+")";
-  updateLCHint();
-}
-function setLCM(m){
-  lcMode=m;
-  document.getElementById("lcm-t").style.cssText=m==="total"?"background:#006847;color:#fff;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  document.getElementById("lcm-i").style.cssText=m==="individual"?"background:#006847;color:#fff;font-weight:700;":"background:#fff;color:#111;font-weight:400;";
-  document.getElementById("lc-tf").style.display=m==="total"?"block":"none";
-  document.getElementById("lc-im").style.display=m==="individual"?"block":"none";
-  for(var i=0;i<itens.length;i++){var el=document.getElementById("lci-"+itens[i].id);if(el)el.style.display=m==="individual"&&loteIds.indexOf(itens[i].id)>=0?"inline-block":"none";}
-}
-function updateLCHint(){var n=loteIds.length;var v=Number(document.getElementById("lc-val").value)||0;document.getElementById("lc-hint").textContent=n>0&&v>0?"= R$"+(v/n).toFixed(2)+" por item":"";}
-function salvarCLote(){
-  var n=loteIds.length;if(!n)return;
-  for(var i=0;i<loteIds.length;i++){
-    var id=loteIds[i];var item=null;for(var j=0;j<itens.length;j++)if(itens[j].id===id){item=itens[j];break;}if(!item)continue;
-    var tot=lcMode==="total"?(Number(document.getElementById("lc-val").value)||0)/n:Number(document.getElementById("lci-"+id)?document.getElementById("lci-"+id).value:0)||0;
-    trans.push({id:gid(),tipo:"Compra",copa:item.copa,desc:item.tipo+(item.numFig?" #"+item.numFig:"")+(item.desc?" - "+item.desc:""),quantidade:item.quantidade,valorUnit:tot,total:tot,data:toS(document.getElementById("lc-data").value),contra:document.getElementById("lc-comp").value});
+async function salvarVendaLote(){
+  const ids=[...document.querySelectorAll('.vlChk:checked')].map(c=>c.value);
+  if(!ids.length){alert('Selecione ao menos uma figurinha.');return;}
+  const data=brParaIso($('vlData').value)||hojeISO();
+  const modo=$('vlModo').value;
+  let totalVenda=0;
+  if(modo==='total'){
+    totalVenda=Number($('vlTotal').value||0);
+  }else{
+    document.querySelectorAll('.vlVal').forEach(inp=>{if(ids.includes(inp.dataset.id))totalVenda+=Number(inp.value||0);});
   }
-  saveData();closeModal("m-lc");renderAba();
+  for(const id of ids)await sb.from('kz_figurinhas').update({status:'vendida'}).eq('id',id);
+  await sb.from('kz_transacoes').insert([{tipo:'venda',data,copa:'2022',descricao:'Venda em lote — '+ids.length+' figurinha(s)',valor:totalVenda}]);
+  fecharModal();await carregarTudo();
 }
 
-function openGG(){
-  document.getElementById("gg-t").value="Compra";document.getElementById("gg-c").value="";
-  document.getElementById("gg-desc").value="";document.getElementById("gg-q").value=1;
-  document.getElementById("gg-v").value="";document.getElementById("gg-d").value=hj();
-  document.getElementById("gg-co").value="";openModal("m-gg");
+/* ---------- SET COMPLETO ---------- */
+function modalSet(){
+  let opt=ALBUNS.map(a=>'<option value="'+a.code+'">'+esc(a.nome)+' ('+a.ed+')</option>').join('');
+  modal('<h3>Gerar Set Completo</h3>'
+   +'<p class="note">Set Completo = ter todas as figurinhas avulsas do álbum (sem colar). O custo é calculado pela média atual das figurinhas desse álbum de referência.</p>'
+   +'<div class="fld"><label>Copa</label><input id="sCopa" value="2022"></div>'
+   +'<div class="fld"><label>Álbum de referência</label><select id="sCat">'+opt+'</select></div>'
+   +'<div id="sInfo" class="note"></div>'
+   +'<div class="bar" style="margin-top:12px"><button class="btn ghost" onclick="setVerificar()">Verificar</button><button class="btn gold" onclick="salvarSet()">Gerar set</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
 }
-function salvarGeral(){
-  var d=document.getElementById("gg-desc").value;if(!d){alert("Informe a descricao.");return;}
-  var tot=Number(document.getElementById("gg-v").value)||0;
-  var q=Number(document.getElementById("gg-q").value)||1;
-  trans.push({id:gid(),tipo:document.getElementById("gg-t").value,copa:document.getElementById("gg-c").value,desc:d,quantidade:q,valorUnit:tot/q,total:tot,data:toS(document.getElementById("gg-d").value),contra:document.getElementById("gg-co").value});
-  saveData();closeModal("m-gg");renderAba();
+function setStatus(){
+  const cat=$('sCat').value,alb=ALBUNS.find(a=>a.code===cat),copa=$('sCopa').value.trim()||'2022';
+  const todos=cromosEdicao(alb.ed).map(c=>c.num);
+  const tem=new Set(ST.figurinhas.filter(f=>f.copa===copa&&f.catalogo_album===cat&&(f.status==='colecao'||f.status==='repetida')).map(f=>f.numero));
+  const faltam=todos.filter(n=>!tem.has(n));
+  const media=mediaAlbum(copa,cat);
+  return {alb,copa,todos,faltam,media,custo:media*todos.length};
+}
+function setVerificar(){
+  const s=setStatus();
+  $('sInfo').innerHTML='Total de cromos: '+s.todos.length+' · você tem '+(s.todos.length-s.faltam.length)
+    +' · faltam '+s.faltam.length+'<br>Média atual: '+money(s.media)+' · Custo do set: '+money(s.custo)
+    +(s.faltam.length?'<br><b style="color:var(--red)">Faltam figurinhas — não é possível fechar o set ainda.</b>':'<br><b style="color:var(--green)">Coleção completa — pode gerar o set.</b>');
+}
+async function salvarSet(){
+  const s=setStatus();
+  if(s.faltam.length){alert('Faltam '+s.faltam.length+' figurinha(s). Não é possível fechar o set.');return;}
+  const {error}=await sb.from('kz_sets').insert([{copa:s.copa,catalogo_album:s.alb.code,edicao:s.alb.ed,custo:s.custo,status:'colecao',data:hojeISO()}]);
+  if(error){alert('Erro: '+error.message);return;}
+  fecharModal();await carregarTudo();
 }
 
-function openModal(id){document.getElementById(id).classList.add("show");}
-function closeModal(id){document.getElementById(id).classList.remove("show");}
-window.addEventListener("click",function(e){if(e.target.classList.contains("overlay"))e.target.classList.remove("show");});
+/* ---------- GASTO GERAL ---------- */
+function modalGasto(){
+  modal('<h3>Registrar gasto geral</h3>'
+   +'<div class="fld"><label>Copa (opcional — deixe vazio para gasto não ligado a uma coleção)</label><input id="gCopa" placeholder="ex: 2022 ou vazio"></div>'
+   +'<div class="fld"><label>Descrição</label><input id="gDesc" placeholder="ex: capa plástica, frete, hospedagem do sistema..."></div>'
+   +'<div class="fld"><label>Valor (R$)</label><input id="gVal" type="number" step="0.01" value="0"></div>'
+   +'<div class="fld"><label>Data</label><input id="gData" data-data placeholder="dd/mm/aa" value="'+isoParaBr(hojeISO())+'"></div>'
+   +'<div class="bar" style="margin-top:12px"><button class="btn gold" onclick="salvarGasto()">Salvar</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
+}
+async function salvarGasto(){
+  const valor=Number($('gVal').value||0);
+  const reg={tipo:'gasto',data:brParaIso($('gData').value)||hojeISO(),copa:$('gCopa').value.trim()||null,descricao:$('gDesc').value.trim(),valor};
+  const {error}=await sb.from('kz_transacoes').insert([reg]);
+  if(error){alert('Erro: '+error.message);return;}
+  fecharModal();await carregarTudo();
+}
 
-(function(){
-  var s=lg("kc_s",null);
-  if(s){var d=lg("kc_d_"+s.email,{itens:[],trans:[]});itens=d.itens||[];trans=d.trans||[];catFigsStore=lg("kc_cf_"+s.email,{});sess=s;document.getElementById("auth-screen").style.display="none";document.getElementById("app").style.display="block";document.getElementById("uname").textContent="Ola, "+s.nome.split(" ")[0];initSelects();renderAba();}
-})();
-</script>
-</body>
-</html>
+/* ---------- EXCLUIR ---------- */
+async function excluir(tabela,id){
+  if(!confirm('Excluir este registro?'))return;
+  await sb.from(tabela).delete().eq('id',id);
+  await carregarTudo();
+}
+
+/* ---------- BACKUP ---------- */
+function exportar(){
+  const blob=new Blob([JSON.stringify(ST,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='backup_kolecao_'+hojeISO()+'
