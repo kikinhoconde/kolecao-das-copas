@@ -697,4 +697,9 @@ function exportar(){
   const blob=new Blob([JSON.stringify(ST,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='backup_kolecao_'+hojeISO()+'
+  a.download='backup_kolecao_'+hojeISO()+'.json';
+  a.click();
+}
+</script>
+</body>
+</html>
