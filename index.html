@@ -6,7 +6,7 @@
 <title>KOLEÇÃO — Ecossistema Katorze</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#0e1220;--navy2:#12172b;--navy3:#1b2140;--gold:#c9a24a;--gold-light:#f3dba0;--gold-dark:#8b6b24;--bordo:#e2a0ad;--bg:#0b0e1a;--line:rgba(201,162,74,.18);--red:#e8716f;--green:#63c97c;--mut:#8a8fa3;--head:#f3dba0;--text:#f4f5f7}
+:root{--navy:#1c2336;--navy2:#232c44;--navy3:#2c3654;--gold:#c9a24a;--gold-light:#f3dba0;--gold-dark:#8b6b24;--bordo:#e2a0ad;--bg:#171d2e;--line:rgba(201,162,74,.22);--red:#e8716f;--green:#63c97c;--mut:#9aa0b8;--head:#f3dba0;--text:#f4f5f7}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif}
 body{background:var(--bg);color:var(--text);position:relative;overflow-x:hidden;min-height:100vh}
 body::before{content:"";position:fixed;top:-200px;left:-140px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,74,.22),transparent 70%);filter:blur(110px);z-index:0;pointer-events:none}
@@ -451,30 +451,30 @@ function renderDash(){
 
 function nomeAlbum(code){const a=albCatPorCodigo(code);return a?a.nome:code;}
 function renderKol(){
-  if(!ST.albuns.length)$('listaAlbuns').innerHTML='<div class="empty">Nenhum álbum cadastrado.</div>';
+  const albunsColecao=ST.albuns.filter(a=>a.status!=='vendido');
+  if(!albunsColecao.length)$('listaAlbuns').innerHTML='<div class="empty">Nenhum álbum na coleção.</div>';
   else{
     let h='<table><tr><th>Álbum</th><th>Copa</th><th>Qtd</th><th>Estado</th><th>Status</th><th>Valor</th><th></th></tr>';
-    ST.albuns.forEach(a=>{
-      const v=a.status==='vendido';
-      h+='<tr><td>'+esc(a.nome||nomeAlbum(a.catalogo_album))+'</td><td>'+esc(a.copa)+'</td><td>'+(a.quantidade||1)+'</td><td>'+esc(a.estado||'-')+'</td><td><span class="tag '+a.status+'">'+a.status+'</span></td><td class="val '+(v?'pos':'neg')+'">'+(v?money(a.valor_venda):money(a.custo))+'</td><td>'+(v?'':'<button class="btn ghost sm" onclick="editAlbum(\''+a.id+'\')">Editar</button> <button class="btn green sm" onclick="venderItem(\'album\',\''+a.id+'\')">Vender</button> ')+'<button class="btn red sm" onclick="excluir(\'kz_albuns\',\''+a.id+'\')">×</button></td></tr>';
+    albunsColecao.forEach(a=>{
+      h+='<tr><td>'+esc(a.nome||nomeAlbum(a.catalogo_album))+'</td><td>'+esc(a.copa)+'</td><td>'+(a.quantidade||1)+'</td><td>'+esc(a.estado||'-')+'</td><td><span class="tag '+a.status+'">'+a.status+'</span></td><td class="val neg">'+money(a.custo)+'</td><td><button class="btn ghost sm" onclick="editAlbum(\''+a.id+'\')">Editar</button> <button class="btn green sm" onclick="venderItem(\'album\',\''+a.id+'\')">Vender</button> <button class="btn red sm" onclick="excluir(\'kz_albuns\',\''+a.id+'\')">×</button></td></tr>';
     });
     $('listaAlbuns').innerHTML=h+'</table>';
   }
-  if(!ST.figurinhas.length)$('listaFig').innerHTML='<div class="empty">Nenhuma figurinha cadastrada.</div>';
+  const figColecao=ST.figurinhas.filter(f=>f.status!=='vendida');
+  if(!figColecao.length)$('listaFig').innerHTML='<div class="empty">Nenhuma figurinha na coleção.</div>';
   else{
     let h='<table><tr><th>Nº</th><th>Álbum ref.</th><th>Copa</th><th>Ed.</th><th>Qtd</th><th>Custo unit.</th><th>Status</th><th></th></tr>';
-    ST.figurinhas.forEach(f=>{
-      const v=f.status==='vendida';
-      h+='<tr><td><b>'+esc(f.numero)+'</b></td><td>'+esc(nomeAlbum(f.catalogo_album))+'</td><td>'+esc(f.copa)+'</td><td>'+esc(f.edicao)+'</td><td>'+f.quantidade+'</td><td class="val '+(v?'pos':'neg')+'">'+money(f.custo_unit)+'</td><td><span class="tag '+f.status+'">'+f.status+'</span></td><td><button class="btn ghost sm" onclick="editFig(\''+f.id+'\')">Editar</button> <button class="btn red sm" onclick="excluir(\'kz_figurinhas\',\''+f.id+'\')">×</button></td></tr>';
+    figColecao.forEach(f=>{
+      h+='<tr><td><b>'+esc(f.numero)+'</b></td><td>'+esc(nomeAlbum(f.catalogo_album))+'</td><td>'+esc(f.copa)+'</td><td>'+esc(f.edicao)+'</td><td>'+f.quantidade+'</td><td class="val neg">'+money(f.custo_unit)+'</td><td><span class="tag '+f.status+'">'+f.status+'</span></td><td><button class="btn ghost sm" onclick="editFig(\''+f.id+'\')">Editar</button> <button class="btn red sm" onclick="excluir(\'kz_figurinhas\',\''+f.id+'\')">×</button></td></tr>';
     });
     $('listaFig').innerHTML=h+'</table>';
   }
-  if(!ST.sets.length)$('listaSets').innerHTML='<div class="empty">Nenhum set completo gerado.</div>';
+  const setsColecao=ST.sets.filter(s=>s.status!=='vendido');
+  if(!setsColecao.length)$('listaSets').innerHTML='<div class="empty">Nenhum set completo na coleção.</div>';
   else{
     let h='<table><tr><th>Copa</th><th>Álbum ref.</th><th>Ed.</th><th>Custo</th><th>Status</th><th></th></tr>';
-    ST.sets.forEach(s=>{
-      const v=s.status==='vendido';
-      h+='<tr><td>'+esc(s.copa)+'</td><td>'+esc(nomeAlbum(s.catalogo_album))+'</td><td>'+esc(s.edicao)+'</td><td class="val '+(v?'pos':'neg')+'">'+(v?money(s.valor_venda):money(s.custo))+'</td><td><span class="tag '+(v?'vendido':'colecao')+'">'+(v?'vendido':'colecao')+'</span></td><td>'+(v?'':'<button class="btn green sm" onclick="venderItem(\'set\',\''+s.id+'\')">Vender</button> ')+'<button class="btn red sm" onclick="excluir(\'kz_sets\',\''+s.id+'\')">×</button></td></tr>';
+    setsColecao.forEach(s=>{
+      h+='<tr><td>'+esc(s.copa)+'</td><td>'+esc(nomeAlbum(s.catalogo_album))+'</td><td>'+esc(s.edicao)+'</td><td class="val neg">'+money(s.custo)+'</td><td><span class="tag colecao">colecao</span></td><td><button class="btn green sm" onclick="venderItem(\'set\',\''+s.id+'\')">Vender</button> <button class="btn red sm" onclick="excluir(\'kz_sets\',\''+s.id+'\')">×</button></td></tr>';
     });
     $('listaSets').innerHTML=h+'</table>';
   }
@@ -898,3 +898,4 @@ async function salvarAdmItem(id){
 </script>
 </body>
 </html>
+                                                            
