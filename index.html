@@ -267,7 +267,7 @@ function cromosEdicao(copa, ed){
 function cromosSecao(copa, ed, sec){ return cromosEdicao(copa,ed).filter(x=>x.sec===sec); }
 
 let sb=null, USER=null, IS_ADMIN=false;
-let ST={ albuns:[], figurinhas:[], itens:[], sets:[], transacoes:[], COPAS:[], ALBUNS:[], ITENS_CAT:[], usuarios:[] };
+let ST={ albuns:[], figurinhas:[], itens:[], sets:[], transacoes:[], COPAS:[], ALBUNS:[], ITENS_CAT:[], usuarios:[], midias:[] };
 let authMode='login';
 
 const $=id=>document.getElementById(id);
@@ -327,13 +327,15 @@ async function contaBloqueada(){
   }catch(e){return false;}
 }
 async function carregarCatalogo(){
-  const [c,a,i,adm]=await Promise.all([
+  const [c,a,i,adm,md]=await Promise.all([
     sb.from('kz_cat_copas').select('*').order('ordem',{ascending:false}),
     sb.from('kz_cat_albuns').select('*').order('nome'),
     sb.from('kz_cat_itens').select('*').order('nome'),
-    sb.from('kz_admins').select('user_id').eq('user_id',USER.id).maybeSingle()
+    sb.from('kz_admins').select('user_id').eq('user_id',USER.id).maybeSingle(),
+    sb.from('kz_cat_midias').select('*').order('ordem')
   ]);
   ST.COPAS=c.data||[]; ST.ALBUNS=a.data||[]; ST.ITENS_CAT=i.data||[];
+  ST.midias = md.error?[]:(md.data||[]);
   IS_ADMIN = !!(adm.data);
   $('navAdm').classList.toggle('hide', !IS_ADMIN);
   $('navUsers').classList.toggle('hide', !IS_ADMIN);
@@ -390,6 +392,88 @@ async function excluirUsuario(id,email){
 
 function go(pg){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));$('pg-'+pg).classList.add('on');document.querySelectorAll('#topbar nav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===pg));}
 
+function midiasDe(tipoPai,paiId){ return ST.midias.filter(m=> tipoPai==='album' ? m.album_id===paiId : m.item_id===paiId); }
+function midiaResumo(tipoPai,paiId){
+  const lista=midiasDe(tipoPai,paiId);
+  const nImg=lista.filter(m=>m.tipo==='imagem').length, nPdf=lista.filter(m=>m.tipo==='pdf').length;
+  if(!nImg&&!nPdf) return '<span class="note">—</span>';
+  return (nImg?'🖼 '+nImg+' ':'')+(nPdf?'📄 '+nPdf:'');
+}
+function galeriaHtml(tipoPai,paiId,leitura){
+  const lista=midiasDe(tipoPai,paiId);
+  if(!lista.length) return '<p class="note">Nenhum arquivo ainda.</p>';
+  return '<div class="catfig" style="margin-top:6px;gap:8px">'+lista.map(m=>{
+    const delBtn=leitura?'':'<button class="btn red sm" style="width:100%;border-radius:0 0 6px 6px" onclick="excluirMidia(\''+m.id+'\',\''+tipoPai+'\',\''+paiId+'\')">×</button>';
+    if(m.tipo==='imagem'){
+      return '<span style="padding:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:inline-flex;flex-direction:column;align-items:center;width:84px">'
+        +'<img src="'+esc(m.url)+'" style="width:84px;height:84px;object-fit:cover;display:block;cursor:pointer" onclick="window.open(\''+esc(m.url)+'\',\'_blank\')">'
+        +delBtn+'</span>';
+    }
+    return '<span style="display:inline-flex;flex-direction:column;align-items:center;width:84px;border:1px solid var(--line);border-radius:6px;padding:6px 0 0">'
+      +'<a href="'+esc(m.url)+'" target="_blank" style="color:var(--gold-light);font-size:24px;text-decoration:none">📄</a>'
+      +'<span style="font-size:10px;color:var(--mut);max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:2px 4px">'+esc(m.nome_arquivo||'PDF')+'</span>'
+      +delBtn+'</span>';
+  }).join('')+'</div>';
+}
+function compactarImagem(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const max=1280; let w=img.width,h=img.height;
+        if(w>max||h>max){ if(w>h){h=Math.round(h*max/w);w=max;} else {w=Math.round(w*max/h);h=max;} }
+        const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.82);
+      };
+      img.onerror=reject; img.src=e.target.result;
+    };
+    reader.onerror=reject; reader.readAsDataURL(file);
+  });
+}
+async function uploadMidia(tipoPai,paiId,inputEl){
+  const files=Array.from(inputEl.files||[]);
+  if(!files.length)return;
+  inputEl.disabled=true;
+  for(const file of files){
+    const ehPdf = file.type==='application/pdf' || /\.pdf$/i.test(file.name);
+    let blob=file, ext='jpg', tipo='imagem', contentType='image/jpeg';
+    if(ehPdf){ tipo='pdf'; ext='pdf'; contentType='application/pdf'; }
+    else{
+      try{ blob=await compactarImagem(file); }
+      catch(e){ alert('Não consegui processar a imagem '+file.name+'.'); continue; }
+    }
+    const path=tipoPai+'/'+paiId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+ext;
+    const {error:upErr}=await sb.storage.from('catalogo-midia').upload(path,blob,{contentType});
+    if(upErr){ alert('Erro ao enviar '+file.name+': '+upErr.message+'. Confirme se o bucket \"catalogo-midia\" já foi criado no projeto.'); continue; }
+    const {data:pub}=sb.storage.from('catalogo-midia').getPublicUrl(path);
+    const reg={ tipo, url:pub.publicUrl, nome_arquivo:file.name };
+    reg[tipoPai+'_id']=paiId;
+    const {error:insErr}=await sb.from('kz_cat_midias').insert([reg]);
+    if(insErr) alert('Erro ao salvar registro de '+file.name+': '+insErr.message);
+  }
+  inputEl.disabled=false; inputEl.value='';
+  await carregarCatalogo();
+  if(tipoPai==='album') modalAdmAlbum(paiId); else modalAdmItem(paiId);
+  renderTudo();
+}
+async function excluirMidia(id,tipoPai,paiId){
+  if(!confirm('Remover este arquivo?'))return;
+  const m=ST.midias.find(x=>x.id===id);
+  if(m){
+    try{
+      const marker='/catalogo-midia/';
+      const idx=m.url.indexOf(marker);
+      if(idx>-1){ const path=decodeURIComponent(m.url.slice(idx+marker.length)); await sb.storage.from('catalogo-midia').remove([path]); }
+    }catch(e){}
+  }
+  await sb.from('kz_cat_midias').delete().eq('id',id);
+  await carregarCatalogo();
+  if(tipoPai==='album') modalAdmAlbum(paiId); else modalAdmItem(paiId);
+  renderTudo();
+}
+
 function preencheCopasSelect(){
   const sel=$('catCopa');sel.innerHTML='';
   ST.COPAS.forEach(c=>sel.insertAdjacentHTML('beforeend','<option value="'+c.ano+'">'+esc(c.ano)+' — '+esc(c.sede||c.nome)+'</option>'));
@@ -412,15 +496,17 @@ function renderCat(){
   lista.forEach(c=>h+='<span><b>'+esc(c.num)+'</b> · '+esc(c.desc)+'</span>');
   h+='</div>';
   if(albs.length){
-    h+='<h4 style="margin:18px 0 8px;color:var(--head);font-size:14px">Álbuns desta Copa no catálogo</h4><table><tr><th>Código</th><th>Nome</th><th>Ed.</th><th>Capa</th><th>Cor</th><th>País impr.</th><th>Num</th></tr>';
-    albs.forEach(a=>h+='<tr><td>'+esc(a.codigo||'')+'</td><td>'+esc(a.nome)+'</td><td>'+esc(a.edicao||'')+'</td><td>'+esc(a.capa||'')+'</td><td>'+esc(a.cor||'')+'</td><td>'+esc(a.pais_impressao||'')+'</td><td>'+(a.numerado?'Sim':'Não')+'</td></tr>');
+    h+='<h4 style="margin:18px 0 8px;color:var(--head);font-size:14px">Álbuns desta Copa no catálogo</h4><table><tr><th>Código</th><th>Nome</th><th>Ed.</th><th>Capa</th><th>Cor</th><th>País impr.</th><th>Num</th><th>Mídia</th></tr>';
+    albs.forEach(a=>h+='<tr><td>'+esc(a.codigo||'')+'</td><td>'+esc(a.nome)+'</td><td>'+esc(a.edicao||'')+'</td><td>'+esc(a.capa||'')+'</td><td>'+esc(a.cor||'')+'</td><td>'+esc(a.pais_impressao||'')+'</td><td>'+(a.numerado?'Sim':'Não')+'</td><td>'+midiaResumo('album',a.id)+'</td></tr>');
     h+='</table>';
+    albs.forEach(a=>{ if(midiasDe('album',a.id).length) h+='<div class="note" style="margin-top:10px">'+esc(a.nome)+'</div>'+galeriaHtml('album',a.id,true); });
   }
   const itens=itensDaCopa(copa);
   if(itens.length){
-    h+='<h4 style="margin:18px 0 8px;color:var(--head);font-size:14px">Outros itens desta Copa</h4><table><tr><th>Tipo</th><th>Nome</th><th>Descrição</th></tr>';
-    itens.forEach(i=>h+='<tr><td>'+esc(i.tipo)+'</td><td>'+esc(i.nome)+'</td><td>'+esc(i.descricao||'')+'</td></tr>');
+    h+='<h4 style="margin:18px 0 8px;color:var(--head);font-size:14px">Outros itens desta Copa</h4><table><tr><th>Tipo</th><th>Nome</th><th>Descrição</th><th>Mídia</th></tr>';
+    itens.forEach(i=>h+='<tr><td>'+esc(i.tipo)+'</td><td>'+esc(i.nome)+'</td><td>'+esc(i.descricao||'')+'</td><td>'+midiaResumo('item',i.id)+'</td></tr>');
     h+='</table>';
+    itens.forEach(i=>{ if(midiasDe('item',i.id).length) h+='<div class="note" style="margin-top:10px">'+esc(i.nome)+'</div>'+galeriaHtml('item',i.id,true); });
   }
   $('catBody').innerHTML=h;
 }
@@ -838,11 +924,11 @@ function renderAdm(){
   let h='<table><tr><th>Ano</th><th>Nome</th><th>Sede</th><th>Status</th><th></th></tr>';
   ST.COPAS.forEach(c=>h+='<tr><td>'+esc(c.ano)+'</td><td>'+esc(c.nome)+'</td><td>'+esc(c.sede||'')+'</td><td>'+esc(c.status||'')+'</td><td><button class="btn ghost sm" onclick="modalAdmCopa(\''+c.id+'\')">Editar</button> <button class="btn red sm" onclick="admExcluir(\'kz_cat_copas\',\''+c.id+'\')">×</button></td></tr>');
   $('admListaCopas').innerHTML=h+'</table>';
-  h='<table><tr><th>Copa</th><th>Código</th><th>Nome</th><th>Ed.</th><th>Capa</th><th>Cor</th><th>Total</th><th></th></tr>';
-  ST.ALBUNS.forEach(a=>{const c=copaPorId(a.copa_id);h+='<tr><td>'+esc(c?c.ano:'?')+'</td><td>'+esc(a.codigo||'')+'</td><td>'+esc(a.nome)+'</td><td>'+esc(a.edicao||'')+'</td><td>'+esc(a.capa||'')+'</td><td>'+esc(a.cor||'')+'</td><td>'+(a.total_cromos||'-')+'</td><td><button class="btn ghost sm" onclick="modalAdmAlbum(\''+a.id+'\')">Editar</button> <button class="btn red sm" onclick="admExcluir(\'kz_cat_albuns\',\''+a.id+'\')">×</button></td></tr>';});
+  h='<table><tr><th>Copa</th><th>Código</th><th>Nome</th><th>Ed.</th><th>Capa</th><th>Cor</th><th>Total</th><th>Mídia</th><th></th></tr>';
+  ST.ALBUNS.forEach(a=>{const c=copaPorId(a.copa_id);h+='<tr><td>'+esc(c?c.ano:'?')+'</td><td>'+esc(a.codigo||'')+'</td><td>'+esc(a.nome)+'</td><td>'+esc(a.edicao||'')+'</td><td>'+esc(a.capa||'')+'</td><td>'+esc(a.cor||'')+'</td><td>'+(a.total_cromos||'-')+'</td><td>'+midiaResumo('album',a.id)+'</td><td><button class="btn ghost sm" onclick="modalAdmAlbum(\''+a.id+'\')">Editar</button> <button class="btn red sm" onclick="admExcluir(\'kz_cat_albuns\',\''+a.id+'\')">×</button></td></tr>';});
   $('admListaAlbuns').innerHTML=h+'</table>';
-  h='<table><tr><th>Copa</th><th>Tipo</th><th>Nome</th><th>Descrição</th><th></th></tr>';
-  ST.ITENS_CAT.forEach(i=>{const c=copaPorId(i.copa_id);h+='<tr><td>'+esc(c?c.ano:'?')+'</td><td>'+esc(i.tipo)+'</td><td>'+esc(i.nome)+'</td><td>'+esc(i.descricao||'')+'</td><td><button class="btn ghost sm" onclick="modalAdmItem(\''+i.id+'\')">Editar</button> <button class="btn red sm" onclick="admExcluir(\'kz_cat_itens\',\''+i.id+'\')">×</button></td></tr>';});
+  h='<table><tr><th>Copa</th><th>Tipo</th><th>Nome</th><th>Descrição</th><th>Mídia</th><th></th></tr>';
+  ST.ITENS_CAT.forEach(i=>{const c=copaPorId(i.copa_id);h+='<tr><td>'+esc(c?c.ano:'?')+'</td><td>'+esc(i.tipo)+'</td><td>'+esc(i.nome)+'</td><td>'+esc(i.descricao||'')+'</td><td>'+midiaResumo('item',i.id)+'</td><td><button class="btn ghost sm" onclick="modalAdmItem(\''+i.id+'\')">Editar</button> <button class="btn red sm" onclick="admExcluir(\'kz_cat_itens\',\''+i.id+'\')">×</button></td></tr>';});
   $('admListaItens').innerHTML=h+'</table>';
 }
 async function admExcluir(t,id){if(!confirm('Excluir do catálogo?'))return;const {error}=await sb.from(t).delete().eq('id',id);if(error){alert('Erro: '+error.message);return;}await carregarCatalogo();renderTudo();}
@@ -871,6 +957,8 @@ function modalAdmAlbum(id){
    +'<div class="row3"><div class="fld"><label>Edição</label><input id="aEd" value="'+esc(a?a.edicao||'':'')+'" placeholder="670, 638 ou livre"></div><div class="fld"><label>Capa</label><select id="aCapa"><option value="mole"'+(a&&a.capa==='mole'?' selected':'')+'>mole</option><option value="dura"'+(a&&a.capa==='dura'?' selected':'')+'>dura</option></select></div><div class="fld"><label>Cor</label><input id="aCor" value="'+esc(a?a.cor||'':'')+'"></div></div>'
    +'<div class="row3"><div class="fld"><label>País impressão</label><input id="aPais" value="'+esc(a?a.pais_impressao||'':'')+'"></div><div class="fld"><label>Região distrib.</label><input id="aReg" value="'+esc(a?a.regiao||'':'')+'"></div><div class="fld"><label>Total cromos</label><input id="aTot" type="number" value="'+(a?a.total_cromos||0:0)+'"></div></div>'
    +'<div class="row2"><div class="fld"><label>Numerado?</label><select id="aNum"><option value="false"'+(a&&!a.numerado?' selected':'')+'>Não</option><option value="true"'+(a&&a.numerado?' selected':'')+'>Sim</option></select></div><div class="fld"><label>Observação</label><input id="aObs" value="'+esc(a?a.obs||'':'')+'"></div></div>'
+   +(a? ('<div class="fld"><label>Fotos ou PDF do álbum</label><input type="file" multiple accept="image/*,application/pdf" onchange="uploadMidia(\'album\',\''+id+'\',this)"><div>'+galeriaHtml('album',id)+'</div></div>')
+       : '<p class="note">Salve o álbum primeiro; depois clique em Editar para anexar fotos ou PDF.</p>')
    +'<div class="bar" style="margin-top:10px"><button class="btn gold" onclick="salvarAdmAlbum('+(a?'\''+id+'\'':'null')+')">'+(a?'Atualizar':'Criar')+'</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
 }
 async function salvarAdmAlbum(id){
@@ -887,6 +975,8 @@ function modalAdmItem(id){
    +'<div class="row2"><div class="fld"><label>Copa</label><select id="itCopa">'+ST.COPAS.map(c=>'<option value="'+c.id+'"'+(c.id===copaSel?' selected':'')+'>'+esc(c.ano)+'</option>').join('')+'</select></div><div class="fld"><label>Tipo</label><select id="itTipo">'+['kit_atualizacao','mascote','bola','poster','parceria','outro'].map(t=>'<option value="'+t+'"'+(it&&it.tipo===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div></div>'
    +'<div class="fld"><label>Nome</label><input id="itNome" value="'+esc(it?it.nome:'')+'"></div>'
    +'<div class="fld"><label>Descrição</label><input id="itDesc" value="'+esc(it?it.descricao||'':'')+'"></div>'
+   +(it? ('<div class="fld"><label>Fotos ou PDF do item</label><input type="file" multiple accept="image/*,application/pdf" onchange="uploadMidia(\'item\',\''+id+'\',this)"><div>'+galeriaHtml('item',id)+'</div></div>')
+        : '<p class="note">Salve o item primeiro; depois clique em Editar para anexar fotos ou PDF.</p>')
    +'<div class="bar" style="margin-top:10px"><button class="btn gold" onclick="salvarAdmItem('+(it?'\''+id+'\'':'null')+')">'+(it?'Atualizar':'Criar')+'</button><button class="btn ghost" onclick="fecharModal()">Cancelar</button></div>');
 }
 async function salvarAdmItem(id){
@@ -898,4 +988,3 @@ async function salvarAdmItem(id){
 </script>
 </body>
 </html>
-                                                            
