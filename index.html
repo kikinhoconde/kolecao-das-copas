@@ -6,81 +6,87 @@
 <title>KOLEÇÃO — Ecossistema Katorze</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#161b2e;--gold:#c9a24a;--bordo:#6d1f2e;--bg:#f4f5f7;--line:#e2e4ea;--red:#c0392b;--green:#1e8449;--mut:#6b7280}
+:root{--navy:#0e1220;--navy2:#12172b;--navy3:#1b2140;--gold:#c9a24a;--gold-light:#f3dba0;--gold-dark:#8b6b24;--bordo:#e2a0ad;--bg:#0b0e1a;--line:rgba(201,162,74,.18);--red:#e8716f;--green:#63c97c;--mut:#8a8fa3;--head:#f3dba0;--text:#f4f5f7}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-body{background:var(--bg);color:#1f2333}
-button{cursor:pointer;font-size:14px}
-input,select,textarea{font-size:14px}
+body{background:var(--bg);color:var(--text);position:relative;overflow-x:hidden;min-height:100vh}
+body::before{content:"";position:fixed;top:-200px;left:-140px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,74,.22),transparent 70%);filter:blur(110px);z-index:0;pointer-events:none}
+body::after{content:"";position:fixed;top:140px;right:-220px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(70,90,180,.14),transparent 70%);filter:blur(110px);z-index:0;pointer-events:none}
+button{cursor:pointer;font-size:14px;font-family:inherit}
+input,select,textarea{font-size:14px;font-family:inherit}
 .hide{display:none!important}
-#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);width:100%;max-width:380px;padding:32px}
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1}
+.card{background:var(--navy2);border:1px solid var(--line);backdrop-filter:blur(18px);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.35);width:100%;max-width:380px;padding:32px}
 .brand{text-align:center;margin-bottom:22px}
-.brand h1{color:var(--gold);font-size:26px;letter-spacing:1px}
-.brand small{color:var(--mut)}
-.card h2{font-size:17px;margin-bottom:14px;color:var(--navy)}
+.brand h1{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:28px;letter-spacing:2px;font-weight:800}
+.brand small{color:var(--mut);letter-spacing:1px}
+.card h2{font-size:17px;margin-bottom:14px;color:var(--head);font-weight:700}
 .fld{margin-bottom:12px}
 .fld label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
-.fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
-.fld input[readonly]{background:#f7f8fb;color:#4b5063}
-.btn{background:var(--navy);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:600}
-.btn:hover{opacity:.92}
-.btn.gold{background:var(--gold);color:var(--navy)}
-.btn.red{background:var(--red)}
-.btn.green{background:var(--green)}
-.btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.04);color:var(--text)}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold)}
+.fld input[readonly]{background:rgba(255,255,255,.02);color:var(--mut)}
+.btn{background:var(--navy3);color:var(--text);border:1px solid var(--line);padding:10px 16px;border-radius:8px;font-weight:600;transition:filter .15s ease,transform .15s ease}
+.btn:hover{filter:brightness(1.15)}
+.btn.gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-weight:700;border:none}
+.btn.red{background:rgba(232,113,111,.16);color:var(--red);border:1px solid rgba(232,113,111,.35)}
+.btn.green{background:rgba(99,201,124,.16);color:var(--green);border:1px solid rgba(99,201,124,.35)}
+.btn.ghost{background:transparent;color:var(--gold-light);border:1px solid var(--line)}
 .btn.sm{padding:5px 10px;font-size:12px}
-.link{background:none;border:none;color:var(--bordo);text-decoration:underline;font-size:13px}
+.link{background:none;border:none;color:var(--gold-light);text-decoration:underline;font-size:13px}
 .msg{font-size:13px;padding:8px;border-radius:6px;margin-bottom:10px}
-.msg.err{background:#fdecea;color:var(--red)}
-.msg.ok{background:#eafaf1;color:var(--green)}
-#topbar{background:var(--navy);color:#fff;display:flex;align-items:center;padding:0 16px;height:54px}
-#topbar .logo{color:var(--gold);font-weight:700;letter-spacing:1px;margin-right:18px}
+.msg.err{background:rgba(232,113,111,.14);color:var(--red)}
+.msg.ok{background:rgba(99,201,124,.14);color:var(--green)}
+#topbar{background:rgba(18,23,43,.75);backdrop-filter:blur(14px);color:var(--text);display:flex;align-items:center;padding:0 16px;height:56px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+#topbar .logo{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:2px;margin-right:20px;font-size:15px}
 #topbar nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
-#topbar nav button{background:none;border:none;color:#c7cad6;padding:8px 12px;border-radius:7px}
-#topbar nav button.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
-#topbar .who{font-size:12px;color:#9aa0b4;margin-right:10px}
-#wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+#topbar nav button{background:none;border:none;color:var(--mut);padding:8px 12px;border-radius:7px;font-weight:500}
+#topbar nav button.on{background:rgba(201,162,74,.14);color:var(--gold-light);font-weight:700}
+#topbar .who{font-size:12px;color:var(--mut);margin-right:10px}
+#wrap{max-width:1080px;margin:0 auto;padding:22px 16px 60px;position:relative;z-index:1}
 .page{display:none}.page.on{display:block}
-h2.pg{font-size:20px;color:var(--navy);margin-bottom:4px}
+h2.pg{font-size:22px;color:var(--head);margin-bottom:4px;font-weight:800;letter-spacing:.5px}
 .sub{color:var(--mut);font-size:13px;margin-bottom:16px}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.panel{background:rgba(255,255,255,.03);border:1px solid var(--line);backdrop-filter:blur(14px);border-radius:14px;padding:16px;margin-bottom:14px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
-.kpi .v{font-size:22px;font-weight:700;color:var(--navy)}
+.kpi{background:rgba(255,255,255,.03);border:1px solid var(--line);backdrop-filter:blur(14px);border-radius:14px;padding:14px}
+.kpi .v{font-size:24px;font-weight:800;color:var(--head)}
 .kpi .l{font-size:12px;color:var(--mut)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text)}
 th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
-tr:hover td{background:#fafbfc}
-.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#eef0f4;color:#444}
+tr:hover td{background:rgba(255,255,255,.03)}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#eef0f4;color:#444}
 .tag.colecao{background:#e7f0fb;color:#1d5fab}
-.tag.vendido,.tag.vendida{background:#eafaf1;color:var(--green)}
-.tag.perdido,.tag.perdida{background:#fdecea;color:var(--red)}
+.tag.vendido,.tag.vendida{background:#dff7e6;color:#1e8449}
+.tag.perdido,.tag.perdida{background:#fbe0df;color:#a5312f}
 .tag.trocado,.tag.trocada{background:#fef5e7;color:#b9770e}
 .tag.repetida{background:#f3e8fd;color:#7d3cc9}
-.val.neg{color:var(--red);font-weight:600}
-.val.pos{color:var(--green);font-weight:600}
+.val.neg{color:var(--red);font-weight:700}
+.val.pos{color:var(--green);font-weight:700}
 .empty{color:var(--mut);font-size:13px;padding:18px;text-align:center}
-#ov{position:fixed;inset:0;background:rgba(15,18,30,.55);display:flex;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:50}
-#ov .box{background:#fff;border-radius:14px;width:100%;max-width:620px;padding:22px}
-#ov h3{color:var(--navy);margin-bottom:14px;font-size:17px}
+#ov{position:fixed;inset:0;background:rgba(4,5,10,.7);display:flex;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:50}
+#ov .box{background:var(--navy2);border:1px solid var(--line);backdrop-filter:blur(18px);border-radius:16px;width:100%;max-width:620px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+#ov h3{color:var(--head);margin-bottom:14px;font-size:17px;font-weight:700}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .grade{display:flex;flex-wrap:wrap;gap:6px;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 7px;font-size:12px;display:flex;align-items:center;gap:5px}
-.chip.sel{border-color:var(--gold);background:#fdf6e3}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:7px;padding:5px 7px;font-size:12px;display:flex;align-items:center;gap:5px;color:var(--text)}
+.chip.sel{border-color:var(--gold);background:rgba(201,162,74,.14)}
 .chip b{font-size:12px}
-.chip .qt{background:var(--navy);color:#fff;border-radius:10px;padding:0 6px;font-size:11px}
-.chip button{border:none;background:#eef0f4;width:18px;height:18px;border-radius:5px;line-height:1}
+.chip .qt{background:var(--gold);color:var(--navy);border-radius:10px;padding:0 6px;font-size:11px;font-weight:700}
+.chip button{border:none;background:rgba(255,255,255,.08);color:var(--text);width:18px;height:18px;border-radius:5px;line-height:1}
 .note{font-size:12px;color:var(--mut);margin-top:4px}
 .catfig{display:flex;flex-wrap:wrap;gap:5px}
-.catfig span{border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:12px;background:#fff}
-.specs{background:#f7f8fb;border-radius:8px;padding:8px 10px;font-size:12px;color:#3a3f55;margin-bottom:8px}
-.specs b{color:var(--navy)}
+.catfig span{border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:12px;background:rgba(255,255,255,.03);color:var(--text)}
+.specs{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);margin-bottom:8px}
+.specs b{color:var(--head)}
 .lote-itens{border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0;max-height:200px;overflow:auto}
 .lote-item{display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line);font-size:12px}
 .lote-item:last-child{border-bottom:none}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-dot.ok{background:var(--green)}
+.status-dot.blocked{background:var(--red)}
 @media(max-width:560px){.row2,.row3{grid-template-columns:1fr}}
 </style>
 </head>
@@ -88,7 +94,21 @@ tr:hover td{background:#fafbfc}
 
 <div id="auth">
   <div class="card">
-    <div class="brand"><h1>KOLEÇÃO</h1><small>Ecossistema Katorze</small></div>
+    <div class="brand">
+      <svg width="52" height="52" viewBox="0 0 100 100" style="margin-bottom:10px">
+        <defs><linearGradient id="authG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F3DBA0"/><stop offset="100%" stop-color="#8B6B24"/></linearGradient></defs>
+        <path d="M28,16 L72,16 L67,46 Q50,58 33,46 Z" fill="url(#authG)" opacity="0.18"/>
+        <path d="M28,16 L72,16 L67,46 Q50,58 33,46 Z" fill="none" stroke="url(#authG)" stroke-width="2.6" stroke-linejoin="round"/>
+        <path d="M24,22 C8,22 8,42 24,38" fill="none" stroke="url(#authG)" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M76,22 C92,22 92,42 76,38" fill="none" stroke="url(#authG)" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="50" y1="58" x2="50" y2="72" stroke="url(#authG)" stroke-width="2.6"/>
+        <rect x="34" y="72" width="32" height="6" rx="2" fill="none" stroke="url(#authG)" stroke-width="2.4"/>
+        <rect x="26" y="80" width="48" height="7" rx="2" fill="url(#authG)"/>
+        <path d="M50,21 L52.12,27.09 L58.56,27.22 L53.42,31.11 L55.29,37.28 L50,33.6 L44.71,37.28 L46.58,31.11 L41.44,27.22 L47.88,27.09 Z" fill="url(#authG)"/>
+      </svg>
+      <h1>KOLEÇÃO</h1><small>Ecossistema Katorze</small>
+    </div>
+
     <div id="cfgWarn" class="msg err hide">Configuração do Supabase pendente.</div>
     <h2 id="authTitle">Entrar</h2>
     <div id="authMsg"></div>
@@ -109,6 +129,7 @@ tr:hover td{background:#fafbfc}
       <button data-pg="itens" onclick="go('itens')">Itens diversos</button>
       <button data-pg="tr" onclick="go('tr')">Transações</button>
       <button data-pg="adm" id="navAdm" class="hide" onclick="go('adm')">Catálogo (admin)</button>
+      <button data-pg="users" id="navUsers" class="hide" onclick="go('users')">Usuários</button>
     </nav>
     <span class="who" id="who"></span>
     <button class="btn ghost sm" onclick="sair()">Sair</button>
@@ -119,7 +140,7 @@ tr:hover td{background:#fafbfc}
       <h2 class="pg">Painel</h2>
       <p class="sub">Visão geral da coleção e finanças.</p>
       <div class="kpis" id="kpis"></div>
-      <div class="panel"><h3 style="margin-bottom:10px;color:var(--navy);font-size:15px">Progresso por álbum</h3><div id="progresso"></div></div>
+      <div class="panel"><h3 style="margin-bottom:10px;color:var(--head);font-size:15px">Progresso por álbum</h3><div id="progresso"></div></div>
     </div>
 
     <div id="pg-cat" class="page">
@@ -148,9 +169,9 @@ tr:hover td{background:#fafbfc}
         <button class="btn ghost" onclick="modalVendaLote()">Venda em lote</button>
         <button class="btn ghost" onclick="exportar()">Backup (exportar)</button>
       </div>
-      <div class="panel"><h3 style="margin-bottom:8px;color:var(--navy);font-size:15px">Álbuns</h3><div id="listaAlbuns"></div></div>
-      <div class="panel"><h3 style="margin-bottom:8px;color:var(--navy);font-size:15px">Figurinhas avulsas</h3><div id="listaFig"></div></div>
-      <div class="panel"><h3 style="margin-bottom:8px;color:var(--navy);font-size:15px">Sets completos</h3><div id="listaSets"></div></div>
+      <div class="panel"><h3 style="margin-bottom:8px;color:var(--head);font-size:15px">Álbuns</h3><div id="listaAlbuns"></div></div>
+      <div class="panel"><h3 style="margin-bottom:8px;color:var(--head);font-size:15px">Figurinhas avulsas</h3><div id="listaFig"></div></div>
+      <div class="panel"><h3 style="margin-bottom:8px;color:var(--head);font-size:15px">Sets completos</h3><div id="listaSets"></div></div>
     </div>
 
     <div id="pg-itens" class="page">
@@ -170,9 +191,15 @@ tr:hover td{background:#fafbfc}
     <div id="pg-adm" class="page">
       <h2 class="pg">Catálogo — administração</h2>
       <p class="sub">Cadastrar e editar copas, álbuns e itens do catálogo. Visível só para admin.</p>
-      <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="color:var(--navy);font-size:15px">Copas</h3><button class="btn gold sm" onclick="modalAdmCopa()">+ Copa</button></div><div id="admListaCopas"></div></div>
-      <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="color:var(--navy);font-size:15px">Álbuns</h3><button class="btn gold sm" onclick="modalAdmAlbum()">+ Álbum no catálogo</button></div><div id="admListaAlbuns"></div></div>
-      <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="color:var(--navy);font-size:15px">Itens diversos</h3><button class="btn gold sm" onclick="modalAdmItem()">+ Item no catálogo</button></div><div id="admListaItens"></div></div>
+      <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="color:var(--head);font-size:15px">Copas</h3><button class="btn gold sm" onclick="modalAdmCopa()">+ Copa</button></div><div id="admListaCopas"></div></div>
+      <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="color:var(--head);font-size:15px">Álbuns</h3><button class="btn gold sm" onclick="modalAdmAlbum()">+ Álbum no catálogo</button></div><div id="admListaAlbuns"></div></div>
+      <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="color:var(--head);font-size:15px">Itens diversos</h3><button class="btn gold sm" onclick="modalAdmItem()">+ Item no catálogo</button></div><div id="admListaItens"></div></div>
+    </div>
+
+    <div id="pg-users" class="page">
+      <h2 class="pg">Usuários</h2>
+      <p class="sub">Contas com acesso ao KOLEÇÃO. Bloquear impede o login imediatamente; excluir remove a conta e os dados definitivamente.</p>
+      <div class="panel"><div id="listaUsuarios"></div></div>
     </div>
   </div>
 </div>
@@ -240,7 +267,7 @@ function cromosEdicao(copa, ed){
 function cromosSecao(copa, ed, sec){ return cromosEdicao(copa,ed).filter(x=>x.sec===sec); }
 
 let sb=null, USER=null, IS_ADMIN=false;
-let ST={ albuns:[], figurinhas:[], itens:[], sets:[], transacoes:[], COPAS:[], ALBUNS:[], ITENS_CAT:[] };
+let ST={ albuns:[], figurinhas:[], itens:[], sets:[], transacoes:[], COPAS:[], ALBUNS:[], ITENS_CAT:[], usuarios:[] };
 let authMode='login';
 
 const $=id=>document.getElementById(id);
@@ -286,9 +313,18 @@ function traduzErro(m){if(/Invalid login/i.test(m))return'E-mail ou senha incorr
 async function sair(){await sb.auth.signOut();location.reload();}
 
 async function abrirApp(){
+  const bloqueado=await contaBloqueada();
+  if(bloqueado){await sb.auth.signOut();authErr('Sua conta está bloqueada. Fale com o administrador.');return;}
   $('auth').classList.add('hide');$('app').classList.remove('hide');$('who').textContent=USER.email;
   await carregarCatalogo();
   await carregarTudo();
+}
+async function contaBloqueada(){
+  try{
+    const {data,error}=await sb.from('profiles').select('blocked').eq('id',USER.id).maybeSingle();
+    if(error)return false;
+    return !!(data&&data.blocked);
+  }catch(e){return false;}
 }
 async function carregarCatalogo(){
   const [c,a,i,adm]=await Promise.all([
@@ -300,6 +336,13 @@ async function carregarCatalogo(){
   ST.COPAS=c.data||[]; ST.ALBUNS=a.data||[]; ST.ITENS_CAT=i.data||[];
   IS_ADMIN = !!(adm.data);
   $('navAdm').classList.toggle('hide', !IS_ADMIN);
+  $('navUsers').classList.toggle('hide', !IS_ADMIN);
+  if(IS_ADMIN){
+    try{
+      const {data,error}=await sb.from('profiles').select('*').order('created_at',{ascending:false});
+      ST.usuarios=error?[]:(data||[]);
+    }catch(e){ST.usuarios=[];}
+  }else{ST.usuarios=[];}
   preencheCopasSelect();
 }
 async function carregarTudo(){
@@ -313,7 +356,38 @@ async function carregarTudo(){
   ST.albuns=a.data||[]; ST.figurinhas=f.data||[]; ST.itens=it.data||[]; ST.sets=s.data||[]; ST.transacoes=t.data||[];
   renderTudo();
 }
-function renderTudo(){renderDash();renderCat();renderKol();renderItens();renderTr();if(IS_ADMIN)renderAdm();}
+function renderTudo(){renderDash();renderCat();renderKol();renderItens();renderTr();if(IS_ADMIN){renderAdm();renderUsuarios();}}
+function renderUsuarios(){
+  const el=$('listaUsuarios');
+  if(!ST.usuarios.length){el.innerHTML='<div class="empty">Nenhum usuário encontrado. Se a tabela "profiles" ainda não existe no banco, aplique o SQL combinado antes.</div>';return;}
+  let h='<table><tr><th>Status</th><th>E-mail</th><th>Cadastro</th><th>Ações</th></tr>';
+  for(const u of ST.usuarios){
+    const bloqueado=!!u.blocked;
+    const eu=u.id===USER.id;
+    h+='<tr><td><span class="status-dot '+(bloqueado?'blocked':'ok')+'"></span>'+(bloqueado?'Bloqueado':'Ativo')+'</td>';
+    h+='<td>'+esc(u.email||u.id)+(eu?' <span class="tag">você</span>':'')+'</td>';
+    h+='<td>'+(u.created_at?isoParaBr(String(u.created_at).slice(0,10)):'')+'</td>';
+    h+='<td style="display:flex;gap:6px">';
+    h+='<button class="btn ghost sm" onclick="toggleBloqueado(\''+u.id+'\','+bloqueado+')" '+(eu?'disabled':'')+'>'+(bloqueado?'Desbloquear':'Bloquear')+'</button>';
+    h+='<button class="btn red sm" onclick="excluirUsuario(\''+u.id+'\',\''+esc(u.email||'')+'\')" '+(eu?'disabled':'')+'>Excluir</button>';
+    h+='</td></tr>';
+  }
+  h+='</table>';
+  el.innerHTML=h;
+}
+async function toggleBloqueado(id,atual){
+  const {error}=await sb.from('profiles').update({blocked:!atual}).eq('id',id);
+  if(error){alert('Erro: '+error.message);return;}
+  await carregarCatalogo();renderTudo();
+}
+async function excluirUsuario(id,email){
+  if(!confirm('Excluir definitivamente a conta de '+email+'? Essa ação não pode ser desfeita.'))return;
+  const {data,error}=await sb.functions.invoke('admin-delete-user',{body:{user_id:id}});
+  if(error){alert('Erro ao excluir: '+error.message+'. Confirme se a Edge Function "admin-delete-user" já foi publicada no projeto.');return;}
+  if(data&&data.error){alert('Erro ao excluir: '+data.error);return;}
+  await carregarCatalogo();renderTudo();
+}
+
 function go(pg){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));$('pg-'+pg).classList.add('on');document.querySelectorAll('#topbar nav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===pg));}
 
 function preencheCopasSelect(){
@@ -338,13 +412,13 @@ function renderCat(){
   lista.forEach(c=>h+='<span><b>'+esc(c.num)+'</b> · '+esc(c.desc)+'</span>');
   h+='</div>';
   if(albs.length){
-    h+='<h4 style="margin:18px 0 8px;color:var(--navy);font-size:14px">Álbuns desta Copa no catálogo</h4><table><tr><th>Código</th><th>Nome</th><th>Ed.</th><th>Capa</th><th>Cor</th><th>País impr.</th><th>Num</th></tr>';
+    h+='<h4 style="margin:18px 0 8px;color:var(--head);font-size:14px">Álbuns desta Copa no catálogo</h4><table><tr><th>Código</th><th>Nome</th><th>Ed.</th><th>Capa</th><th>Cor</th><th>País impr.</th><th>Num</th></tr>';
     albs.forEach(a=>h+='<tr><td>'+esc(a.codigo||'')+'</td><td>'+esc(a.nome)+'</td><td>'+esc(a.edicao||'')+'</td><td>'+esc(a.capa||'')+'</td><td>'+esc(a.cor||'')+'</td><td>'+esc(a.pais_impressao||'')+'</td><td>'+(a.numerado?'Sim':'Não')+'</td></tr>');
     h+='</table>';
   }
   const itens=itensDaCopa(copa);
   if(itens.length){
-    h+='<h4 style="margin:18px 0 8px;color:var(--navy);font-size:14px">Outros itens desta Copa</h4><table><tr><th>Tipo</th><th>Nome</th><th>Descrição</th></tr>';
+    h+='<h4 style="margin:18px 0 8px;color:var(--head);font-size:14px">Outros itens desta Copa</h4><table><tr><th>Tipo</th><th>Nome</th><th>Descrição</th></tr>';
     itens.forEach(i=>h+='<tr><td>'+esc(i.tipo)+'</td><td>'+esc(i.nome)+'</td><td>'+esc(i.descricao||'')+'</td></tr>');
     h+='</table>';
   }
