@@ -38,7 +38,7 @@ input,select,textarea{font-size:14px;font-family:inherit}
 .msg.err{background:rgba(170,21,27,.10);color:var(--red)}
 .msg.ok{background:rgba(30,132,73,.10);color:var(--green)}
 #topbar{background:rgba(255,255,255,.85);backdrop-filter:blur(14px);color:var(--text);display:flex;align-items:center;padding:0 16px;height:56px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
-#topbar .logo{background:linear-gradient(135deg,var(--red-light),var(--gold-dark));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:2px;margin-right:20px;font-size:15px}
+#topbar .logo{display:block}
 #topbar nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
 #topbar nav button{background:none;border:none;color:var(--mut);padding:8px 12px;border-radius:7px;font-weight:500}
 #topbar nav button.on{background:rgba(170,21,27,.10);color:var(--red);font-weight:700}
@@ -96,18 +96,8 @@ tr:hover td{background:rgba(170,21,27,.03)}
 <div id="auth">
   <div class="card">
     <div class="brand">
-      <svg width="52" height="52" viewBox="0 0 100 100" style="margin-bottom:10px">
-        <defs><linearGradient id="authG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F3DBA0"/><stop offset="100%" stop-color="#8B6B24"/></linearGradient></defs>
-        <path d="M28,16 L72,16 L67,46 Q50,58 33,46 Z" fill="url(#authG)" opacity="0.18"/>
-        <path d="M28,16 L72,16 L67,46 Q50,58 33,46 Z" fill="none" stroke="url(#authG)" stroke-width="2.6" stroke-linejoin="round"/>
-        <path d="M24,22 C8,22 8,42 24,38" fill="none" stroke="url(#authG)" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M76,22 C92,22 92,42 76,38" fill="none" stroke="url(#authG)" stroke-width="2.4" stroke-linecap="round"/>
-        <line x1="50" y1="58" x2="50" y2="72" stroke="url(#authG)" stroke-width="2.6"/>
-        <rect x="34" y="72" width="32" height="6" rx="2" fill="none" stroke="url(#authG)" stroke-width="2.4"/>
-        <rect x="26" y="80" width="48" height="7" rx="2" fill="url(#authG)"/>
-        <path d="M50,21 L52.12,27.09 L58.56,27.22 L53.42,31.11 L55.29,37.28 L50,33.6 L44.71,37.28 L46.58,31.11 L41.44,27.22 L47.88,27.09 Z" fill="url(#authG)"/>
-      </svg>
-      <h1>KOLEÇÃO</h1><small>Ecossistema Katorze</small>
+      <img src="logo-login.webp" alt="KOLEÇÃO das Copas" style="max-width:260px;width:100%;height:auto;margin-bottom:4px">
+      <small>Ecossistema Katorze</small>
     </div>
 
     <div id="cfgWarn" class="msg err hide">Configuração do Supabase pendente.</div>
@@ -122,7 +112,7 @@ tr:hover td{background:rgba(170,21,27,.03)}
 
 <div id="app" class="hide">
   <div id="topbar">
-    <span class="logo">KOLEÇÃO</span>
+    <img class="logo" src="logo-topbar.webp" alt="KOLEÇÃO" style="height:30px;width:auto;margin-right:20px;display:block">
     <nav>
       <button data-pg="dash" class="on" onclick="go('dash')">Painel</button>
       <button data-pg="cat" onclick="go('cat')">Catálogo</button>
