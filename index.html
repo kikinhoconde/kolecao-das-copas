@@ -536,33 +536,59 @@ function renderDash(){
 }
 
 function nomeAlbum(code){const a=albCatPorCodigo(code);return a?a.nome:code;}
+function tabelaVendidos(titulo,lista,cols,linhaFn,tabela){
+  if(!lista.length) return '';
+  let h='<details style="margin-top:10px"><summary style="cursor:pointer;color:var(--mut);font-size:12px">Vendidos ('+lista.length+') — clique pra ver/excluir</summary>';
+  h+='<table style="margin-top:8px"><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'<th></th></tr>';
+  lista.forEach(x=>h+=linhaFn(x));
+  h+='</table></details>';
+  return h;
+}
 function renderKol(){
   const albunsColecao=ST.albuns.filter(a=>a.status!=='vendido');
-  if(!albunsColecao.length)$('listaAlbuns').innerHTML='<div class="empty">Nenhum álbum na coleção.</div>';
+  const albunsVendidos=ST.albuns.filter(a=>a.status==='vendido');
+  if(!albunsColecao.length && !albunsVendidos.length)$('listaAlbuns').innerHTML='<div class="empty">Nenhum álbum na coleção.</div>';
   else{
-    let h='<table><tr><th>Álbum</th><th>Copa</th><th>Qtd</th><th>Estado</th><th>Status</th><th>Valor</th><th></th></tr>';
-    albunsColecao.forEach(a=>{
-      h+='<tr><td>'+esc(a.nome||nomeAlbum(a.catalogo_album))+'</td><td>'+esc(a.copa)+'</td><td>'+(a.quantidade||1)+'</td><td>'+esc(a.estado||'-')+'</td><td><span class="tag '+a.status+'">'+a.status+'</span></td><td class="val neg">'+money(a.custo)+'</td><td><button class="btn ghost sm" onclick="editAlbum(\''+a.id+'\')">Editar</button> <button class="btn green sm" onclick="venderItem(\'album\',\''+a.id+'\')">Vender</button> <button class="btn red sm" onclick="excluir(\'kz_albuns\',\''+a.id+'\')">×</button></td></tr>';
-    });
-    $('listaAlbuns').innerHTML=h+'</table>';
+    let h='';
+    if(albunsColecao.length){
+      h+='<table><tr><th>Álbum</th><th>Copa</th><th>Qtd</th><th>Estado</th><th>Status</th><th>Valor</th><th></th></tr>';
+      albunsColecao.forEach(a=>{
+        h+='<tr><td>'+esc(a.nome||nomeAlbum(a.catalogo_album))+'</td><td>'+esc(a.copa)+'</td><td>'+(a.quantidade||1)+'</td><td>'+esc(a.estado||'-')+'</td><td><span class="tag '+a.status+'">'+a.status+'</span></td><td class="val neg">'+money(a.custo)+'</td><td><button class="btn ghost sm" onclick="editAlbum(\''+a.id+'\')">Editar</button> <button class="btn green sm" onclick="venderItem(\'album\',\''+a.id+'\')">Vender</button> <button class="btn red sm" onclick="excluir(\'kz_albuns\',\''+a.id+'\')">×</button></td></tr>';
+      });
+      h+='</table>';
+    } else h+='<div class="empty">Nenhum álbum na coleção.</div>';
+    h+=tabelaVendidos('Álbuns',albunsVendidos,['Álbum','Copa','Qtd','Valor'],a=>'<tr><td>'+esc(a.nome||nomeAlbum(a.catalogo_album))+'</td><td>'+esc(a.copa)+'</td><td>'+(a.quantidade||1)+'</td><td class="val pos">'+money(a.valor_venda)+'</td><td><button class="btn red sm" onclick="excluir(\'kz_albuns\',\''+a.id+'\')">×</button></td></tr>');
+    $('listaAlbuns').innerHTML=h;
   }
   const figColecao=ST.figurinhas.filter(f=>f.status!=='vendida');
-  if(!figColecao.length)$('listaFig').innerHTML='<div class="empty">Nenhuma figurinha na coleção.</div>';
+  const figVendidas=ST.figurinhas.filter(f=>f.status==='vendida');
+  if(!figColecao.length && !figVendidas.length)$('listaFig').innerHTML='<div class="empty">Nenhuma figurinha na coleção.</div>';
   else{
-    let h='<table><tr><th>Nº</th><th>Álbum ref.</th><th>Copa</th><th>Ed.</th><th>Qtd</th><th>Custo unit.</th><th>Status</th><th></th></tr>';
-    figColecao.forEach(f=>{
-      h+='<tr><td><b>'+esc(f.numero)+'</b></td><td>'+esc(nomeAlbum(f.catalogo_album))+'</td><td>'+esc(f.copa)+'</td><td>'+esc(f.edicao)+'</td><td>'+f.quantidade+'</td><td class="val neg">'+money(f.custo_unit)+'</td><td><span class="tag '+f.status+'">'+f.status+'</span></td><td><button class="btn ghost sm" onclick="editFig(\''+f.id+'\')">Editar</button> <button class="btn red sm" onclick="excluir(\'kz_figurinhas\',\''+f.id+'\')">×</button></td></tr>';
-    });
-    $('listaFig').innerHTML=h+'</table>';
+    let h='';
+    if(figColecao.length){
+      h+='<table><tr><th>Nº</th><th>Álbum ref.</th><th>Copa</th><th>Ed.</th><th>Qtd</th><th>Custo unit.</th><th>Status</th><th></th></tr>';
+      figColecao.forEach(f=>{
+        h+='<tr><td><b>'+esc(f.numero)+'</b></td><td>'+esc(nomeAlbum(f.catalogo_album))+'</td><td>'+esc(f.copa)+'</td><td>'+esc(f.edicao)+'</td><td>'+f.quantidade+'</td><td class="val neg">'+money(f.custo_unit)+'</td><td><span class="tag '+f.status+'">'+f.status+'</span></td><td><button class="btn ghost sm" onclick="editFig(\''+f.id+'\')">Editar</button> <button class="btn red sm" onclick="excluir(\'kz_figurinhas\',\''+f.id+'\')">×</button></td></tr>';
+      });
+      h+='</table>';
+    } else h+='<div class="empty">Nenhuma figurinha na coleção.</div>';
+    h+=tabelaVendidos('Figurinhas',figVendidas,['Nº','Álbum ref.','Copa','Qtd'],f=>'<tr><td><b>'+esc(f.numero)+'</b></td><td>'+esc(nomeAlbum(f.catalogo_album))+'</td><td>'+esc(f.copa)+'</td><td>'+f.quantidade+'</td><td><button class="btn red sm" onclick="excluir(\'kz_figurinhas\',\''+f.id+'\')">×</button></td></tr>');
+    $('listaFig').innerHTML=h;
   }
   const setsColecao=ST.sets.filter(s=>s.status!=='vendido');
-  if(!setsColecao.length)$('listaSets').innerHTML='<div class="empty">Nenhum set completo na coleção.</div>';
+  const setsVendidos=ST.sets.filter(s=>s.status==='vendido');
+  if(!setsColecao.length && !setsVendidos.length)$('listaSets').innerHTML='<div class="empty">Nenhum set completo na coleção.</div>';
   else{
-    let h='<table><tr><th>Copa</th><th>Álbum ref.</th><th>Ed.</th><th>Custo</th><th>Status</th><th></th></tr>';
-    setsColecao.forEach(s=>{
-      h+='<tr><td>'+esc(s.copa)+'</td><td>'+esc(nomeAlbum(s.catalogo_album))+'</td><td>'+esc(s.edicao)+'</td><td class="val neg">'+money(s.custo)+'</td><td><span class="tag colecao">colecao</span></td><td><button class="btn green sm" onclick="venderItem(\'set\',\''+s.id+'\')">Vender</button> <button class="btn red sm" onclick="excluir(\'kz_sets\',\''+s.id+'\')">×</button></td></tr>';
-    });
-    $('listaSets').innerHTML=h+'</table>';
+    let h='';
+    if(setsColecao.length){
+      h+='<table><tr><th>Copa</th><th>Álbum ref.</th><th>Ed.</th><th>Custo</th><th>Status</th><th></th></tr>';
+      setsColecao.forEach(s=>{
+        h+='<tr><td>'+esc(s.copa)+'</td><td>'+esc(nomeAlbum(s.catalogo_album))+'</td><td>'+esc(s.edicao)+'</td><td class="val neg">'+money(s.custo)+'</td><td><span class="tag colecao">colecao</span></td><td><button class="btn green sm" onclick="venderItem(\'set\',\''+s.id+'\')">Vender</button> <button class="btn red sm" onclick="excluir(\'kz_sets\',\''+s.id+'\')">×</button></td></tr>';
+      });
+      h+='</table>';
+    } else h+='<div class="empty">Nenhum set completo na coleção.</div>';
+    h+=tabelaVendidos('Sets',setsVendidos,['Copa','Álbum ref.','Ed.','Valor'],s=>'<tr><td>'+esc(s.copa)+'</td><td>'+esc(nomeAlbum(s.catalogo_album))+'</td><td>'+esc(s.edicao)+'</td><td class="val pos">'+money(s.valor_venda)+'</td><td><button class="btn red sm" onclick="excluir(\'kz_sets\',\''+s.id+'\')">×</button></td></tr>');
+    $('listaSets').innerHTML=h;
   }
 }
 
