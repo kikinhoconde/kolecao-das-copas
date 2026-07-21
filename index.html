@@ -107,6 +107,12 @@ tr:hover td{background:rgba(170,21,27,.03)}
     <div class="fld"><label>Senha</label><input id="aPass" type="password" autocomplete="current-password"></div>
     <button class="btn" style="width:100%" id="aBtn" onclick="doAuth()">Entrar</button>
     <p style="text-align:center;margin-top:12px"><button class="link" id="aSwitch" onclick="switchAuth()">Não tem conta? Cadastre-se</button></p>
+    <p style="text-align:center;margin-top:8px"><button class="link" onclick="esqueciSenha()">Esqueci minha senha</button></p>
+    <div id="recoverBox" class="hide" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+      <p style="font-size:13px;color:var(--mut);margin-bottom:8px">Digite sua nova senha:</p>
+      <div class="fld"><input id="novaSenha" type="password" placeholder="Nova senha (mín. 6 caracteres)"></div>
+      <button class="btn" style="width:100%" onclick="salvarNovaSenha()">Salvar nova senha</button>
+    </div>
   </div>
 </div>
 
@@ -279,6 +285,32 @@ window.addEventListener('DOMContentLoaded',init);
 async function init(){
   if(SUPABASE_URL.indexOf('__')===0||SUPABASE_ANON.indexOf('__')===0){$('cfgWarn').classList.remove('hide');$('aBtn').disabled=true;return;}
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+  sb.auth.onAuthStateChange((event)=>{
+    if(event==='PASSWORD_RECOVERY'){
+      $('aEmail').closest('.fld').classList.add('hide');
+      $('aPass').closest('.fld').classList.add('hide');
+      $('aBtn').classList.add('hide');
+      $('aSwitch').closest('p').classList.add('hide');
+      $('recoverBox').classList.remove('hide');
+      authErr('Digite sua nova senha abaixo.',true);
+    }
+  });
+  const {data}=await sb.auth.getSession();
+  if(data.session && !location.hash.includes('type=recovery')){USER=data.session.user;abrirApp();}
+}
+async function esqueciSenha(){
+  const email=$('aEmail').value.trim();
+  if(!email){authErr('Digite seu e-mail no campo acima e clique de novo.');return;}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  if(error){authErr(traduzErro(error.message));return;}
+  authErr('Enviamos um link de redefinição para '+esc(email)+'. Abra o e-mail (veja o spam também) e clique no link.',true);
+}
+async function salvarNovaSenha(){
+  const pass=$('novaSenha').value;
+  if(!pass||pass.length<6){authErr('A nova senha precisa ter ao menos 6 caracteres.');return;}
+  const {error}=await sb.auth.updateUser({password:pass});
+  if(error){authErr(traduzErro(error.message));return;}
+  authErr('Senha alterada! Entrando...',true);
   const {data}=await sb.auth.getSession();
   if(data.session){USER=data.session.user;abrirApp();}
 }
